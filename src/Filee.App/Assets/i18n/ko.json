@@ -71,6 +71,8 @@
   "toast.skipped": "건너뜀 (파일이 이미 있음)",
   "toast.open_folder": "보기",
   "toast.cancel": "취소",
+  "toast.missing_fonts": "이 PC에 없는 문서 글꼴: {0}",
+  "toast.get_fonts": "글꼴 받기",
   "download.badge": "{0}/s · {1}",
   "download.badge_files": "{0} · {2}개 중 {1}번째",
 

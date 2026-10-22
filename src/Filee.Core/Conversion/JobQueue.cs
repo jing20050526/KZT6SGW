@@ -578,7 +578,14 @@ public sealed class JobQueue : IAsyncDisposable
                         if (preset.Image.ChangesSpeed && !(isLast && finalOutput))
                             preset = AtOriginalSpeed(preset);
                         var stepInfo = new ConversionStep(input, step.From, step.To, preset, allocator, workDir, step.FrameSequence,
-                            key => file.NoticeKey = key, step.MotionPhoto, step.LivePhoto);
+                            key => file.NoticeKey = key, step.MotionPhoto, step.LivePhoto, fonts =>
+                            {
+                                // Replace the collection as one value: the UI can enumerate its snapshot while this
+                                // worker reports another step without racing a mutable List.
+                                file.MissingFonts = file.MissingFonts.Concat(fonts)
+                                    .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                                Notify(job);
+                            }, file.SourcePath);
                         outputs.AddRange(await step.Converter.ConvertAsync(stepInfo, progress, ct));
                     }
                     finally

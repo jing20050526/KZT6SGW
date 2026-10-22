@@ -63,6 +63,9 @@ public sealed class LibreOfficeConverter : IConverter
     /// </summary>
     private static readonly string[] DrawOnlyFor = ["svg", "pdf"];
 
+    /// <summary>Outputs for which LibreOffice lays out document text rather than preserving it for a later editor.</summary>
+    private static readonly HashSet<string> RenderedTargets = ["pdf", "png", "svg", "emf", "wmf"];
+
     private readonly EngineEnvironment _env;
     private readonly ILogger _logger;
 
@@ -104,6 +107,8 @@ public sealed class LibreOfficeConverter : IConverter
     public async Task<IReadOnlyList<string>> ConvertAsync(ConversionStep step, IProgress<double>? progress, CancellationToken cancellationToken)
     {
         var soffice = _soffice ?? throw new InvalidOperationException("LibreOffice was not found.");
+        if (RenderedTargets.Contains(step.To) && DocumentFonts.Missing(step.OriginalSourcePath ?? step.InputPath) is [_, ..] missing)
+            step.MissingFonts?.Invoke(missing);
         var slot = await TakeProfileAsync(cancellationToken);
         try
         {

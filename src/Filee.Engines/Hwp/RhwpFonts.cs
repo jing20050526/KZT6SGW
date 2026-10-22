@@ -59,6 +59,9 @@ internal static class RhwpFonts
     /// <summary>Forgets the fonts looked up so far (<see cref="Infrastructure.EngineCaches.Release"/>).</summary>
     internal static void ReleaseCache() => Fonts.Clear();
 
+    /// <summary>Rechecks one family after the user may have installed it during this session.</summary>
+    internal static void Forget(string face) => Fonts.TryRemove(face, out _);
+
     /// <summary>Replacements by (slot, face): the language, coverage and CFF2 rules above.</summary>
     internal static Dictionary<(string Slot, string Face), string> Plan(
         IReadOnlyList<(string Slot, string Face)> slots, string text, Func<string, InstalledFont?> lookup)

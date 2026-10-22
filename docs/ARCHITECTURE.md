@@ -51,6 +51,9 @@
    "Merge into one PDF" converts each file to PDF and merges with PDFsharp.
    "Compress into one archive" packs the dropped files, unconverted, with the archive engine (`IFileCombiner`).
 6. **Report** – progress and results appear in the toast window and in Home → Recent conversions.
+   Renderers check only the original source for referenced fonts. `ConversionStep.MissingFonts` reports any missing
+   families to `FileResult.MissingFonts`; the toast card can offer one trusted source, while the CLI and watch jobs
+   report the names without pausing conversion or installing anything.
 
 ## Files dragged from a web browser
 

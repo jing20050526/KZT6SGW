@@ -80,6 +80,13 @@ public sealed partial class JobViewModel : ObservableObject
     /// <summary>Notes on files that converted (e.g. a PDF that couldn't be made smaller and was copied), one per line.</summary>
     [ObservableProperty] private string? _notices;
     [ObservableProperty] private bool _hasNotices;
+    /// <summary>Absent document font families, combined across this drop.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasMissingFonts), nameof(CanGetFonts))]
+    private IReadOnlyList<string> _missingFonts = [];
+    [ObservableProperty] private string? _missingFontsText;
+    public bool HasMissingFonts => MissingFonts.Count > 0;
+    public bool CanGetFonts => MissingFonts.Any(family => FontSources.Url(family) is not null);
     /// <summary>Extensions of failed files Filee can't read (".ncm"), for "Request this format".</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanRequestFormat))]
@@ -117,6 +124,15 @@ public sealed partial class JobViewModel : ObservableObject
         HasNotices = noted.Count > 0;
         Notices = noted.Count == 0 ? null : string.Join(Environment.NewLine,
             noted.Select(f => $"{Path.GetFileName(f.SourcePath)} — {_loc[f.NoticeKey!]}"));
+
+        var missingFonts = Job.Files.SelectMany(f => f.MissingFonts)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        if (!missingFonts.SequenceEqual(MissingFonts, StringComparer.OrdinalIgnoreCase))
+            MissingFonts = missingFonts;
+        MissingFontsText = missingFonts.Count == 0 ? null
+            : _loc.Format("toast.missing_fonts", LocalizationService.LeftToRight(string.Join(", ", missingFonts)));
 
         Status = Job.State switch
         {

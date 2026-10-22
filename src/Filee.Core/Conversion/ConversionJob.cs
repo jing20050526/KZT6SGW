@@ -56,6 +56,12 @@ public sealed class FileResult
     /// nothing, so the PDF was copied as it is), if any.
     /// </summary>
     public string? NoticeKey { get; set; }
+
+    /// <summary>
+    /// Referenced document font families that weren't installed before rendering. Conversion still completes with the
+    /// renderer's substitutions; the UI can offer trusted sources afterwards.
+    /// </summary>
+    public IReadOnlyList<string> MissingFonts { get; set; } = [];
 }
 
 /// <summary>A batch of files converted with one preset.</summary>

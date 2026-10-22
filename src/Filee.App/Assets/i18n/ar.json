@@ -66,6 +66,8 @@
   "toast.skipped": "تم التخطي (الملف موجود)",
   "toast.open_folder": "إظهار",
   "toast.cancel": "إلغاء",
+  "toast.missing_fonts": "خطوط المستند المفقودة: {0}",
+  "toast.get_fonts": "الحصول على الخطوط",
   "download.badge": "{0}/ث · {1}",
   "download.badge_files": "{0} · {1} من أصل {2} من الملفات",
   "error.unsupported_source": "نوع الملف هذا غير مدعوم",

@@ -66,6 +66,8 @@
   "toast.skipped": "छोडियो (फाइल पहिले नै मौजूद छ)",
   "toast.open_folder": "देखाउनुहोस्",
   "toast.cancel": "रद्द गर्नुहोस्",
+  "toast.missing_fonts": "यो PC मा नभएका कागजातका फन्टहरू: {0}",
+  "toast.get_fonts": "फन्टहरू प्राप्त गर्नुहोस्",
   "download.badge": "{0}/s · {1}",
   "download.badge_files": "{0} · {2} मध्ये {1} फाइलहरू",
   "error.unsupported_source": "यो फाइल प्रकार समर्थित छैन",

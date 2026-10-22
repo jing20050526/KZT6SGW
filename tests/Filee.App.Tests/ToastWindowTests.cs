@@ -66,6 +66,42 @@ public class ToastWindowTests
         Assert.False(job.HasErrors);
     }
 
+    [AvaloniaFact]
+    public void Missing_document_fonts_are_combined_and_offered_without_blocking_the_job()
+    {
+        TestServices.EnsureInitialized("en");
+        var conversion = new ConversionJob(["C:/one.docx", "C:/two.docx"], new Preset { TargetFormat = "pdf" }, "PDF");
+        conversion.Files[0].State = FileState.Running;
+        conversion.Files[0].MissingFonts = ["Tahoma", "Noto Serif SC"];
+        conversion.Files[1].State = FileState.Done;
+        conversion.Files[1].MissingFonts = ["tahoma"];
+        var job = new JobViewModel(conversion, AppHost.Get<ILocalizer>(), AppHost.Get<IPlatformServices>(), _ => { });
+
+        Assert.True(job.CanGetFonts);
+        Assert.True(job.HasMissingFonts);
+        Assert.Equal(["Noto Serif SC", "Tahoma"], job.MissingFonts);
+        Assert.Equal("Missing document fonts: Noto Serif SC, Tahoma", job.MissingFontsText);
+        Assert.True(job.IsRunning);
+        Assert.Equal("https://learn.microsoft.com/en-us/typography/font-list/tahoma", FontSources.Url("Tahoma")!.ToString());
+        Assert.Equal("https://fonts.google.com/?query=Noto Serif SC", FontSources.Url("Noto Serif SC")!.ToString());
+        Assert.Null(FontSources.Url("맑은 고딕"));
+        Assert.Null(FontSources.Url("함초롬바탕"));
+        Assert.Null(FontSources.Url("MS Mincho"));
+    }
+
+    [AvaloniaFact]
+    public void A_missing_family_without_a_public_font_page_still_shows_the_warning()
+    {
+        TestServices.EnsureInitialized("en");
+        var conversion = new ConversionJob(["C:/one.docx"], new Preset { TargetFormat = "pdf" }, "PDF");
+        conversion.Files[0].MissingFonts = ["MS Mincho"];
+        var job = new JobViewModel(conversion, AppHost.Get<ILocalizer>(), AppHost.Get<IPlatformServices>(), _ => { });
+
+        Assert.True(job.HasMissingFonts);
+        Assert.False(job.CanGetFonts);
+        Assert.Equal("Missing document fonts: MS Mincho", job.MissingFontsText);
+    }
+
     private static int Cards(ToastWindow toast) =>
         toast.GetVisualDescendants().OfType<ItemsControl>().Single(c => c.Name == "Jobs").ItemsPanelRoot?.Children.Count ?? 0;
 

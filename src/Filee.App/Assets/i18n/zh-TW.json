@@ -71,6 +71,8 @@
   "toast.skipped": "已跳過（檔案已存在）",
   "toast.open_folder": "檢視",
   "toast.cancel": "取消",
+  "toast.missing_fonts": "文件缺少字型：{0}",
+  "toast.get_fonts": "取得字型",
   "download.badge": "{0}/s · {1}",
   "download.badge_files": "{0} · 第 {1}/{2} 個檔案",
 

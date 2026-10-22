@@ -71,6 +71,8 @@
   "toast.skipped": "Skipped (file exists)",
   "toast.open_folder": "Show",
   "toast.cancel": "Cancel",
+  "toast.missing_fonts": "Missing document fonts: {0}",
+  "toast.get_fonts": "Get fonts",
   "download.badge": "{0}/s · {1}",
   "download.badge_files": "{0} · {1} of {2} files",
 

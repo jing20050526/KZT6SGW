@@ -10,6 +10,7 @@ using System.IO.Compression;
 using Filee.Core.Conversion;
 using Filee.Engines.Ebooks;
 using Filee.Engines.Infrastructure;
+using Filee.Engines.Office;
 
 namespace Filee.Engines.Hwp;
 
@@ -61,6 +62,9 @@ public sealed class RhwpConverter : IConverter, ITextShapingCheck
         var temp = Path.Combine(step.WorkDirectory, $"rhwp-{Guid.NewGuid():N}.{step.To}");
         try
         {
+            // Intermediate HWPX files include template fonts the user's original document never requested.
+            if (step.To == "pdf" && DocumentFonts.Missing(step.OriginalSourcePath ?? step.InputPath) is [_, ..] missing)
+                step.MissingFonts?.Invoke(missing);
             var input = step.To == "pdf" ? await PrepareAsync(exe, step, cancellationToken) : step.InputPath;
             string[] arguments = step.To switch
             {

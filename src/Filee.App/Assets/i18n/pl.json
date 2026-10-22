@@ -71,6 +71,8 @@
   "toast.skipped": "Pominięto (plik istnieje)",
   "toast.open_folder": "Pokaż",
   "toast.cancel": "Anuluj",
+  "toast.missing_fonts": "Brakujące czcionki dokumentu: {0}",
+  "toast.get_fonts": "Pobierz czcionki",
   "download.badge": "{0}/s · {1}",
   "download.badge_files": "{0} · plik {1} z {2}",
 

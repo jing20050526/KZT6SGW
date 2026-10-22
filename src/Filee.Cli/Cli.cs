@@ -156,7 +156,8 @@ internal static class Cli
         return file.State switch
         {
             FileState.Done => $"ok    {source} -> {string.Join(", ", file.Outputs.Select(Shorten))}"
-                + (file.NoticeKey is null ? "" : $" ({texts[file.NoticeKey]})"),
+                + (file.NoticeKey is null ? "" : $" ({texts[file.NoticeKey]})")
+                + (file.MissingFonts.Count == 0 ? "" : $" (missing fonts: {string.Join(", ", file.MissingFonts)})"),
             FileState.Skipped => $"skip  {source} (the output file already exists)",
             FileState.Cancelled => $"stop  {source} (cancelled)",
             _ => $"fail  {source}: {Error(file, texts)}",
@@ -201,6 +202,13 @@ internal static class Cli
                     json.WriteString("error", Error(file, texts));
                 else if (file.NoticeKey is not null)
                     json.WriteString("notice", texts[file.NoticeKey]);
+                if (file.MissingFonts.Count > 0)
+                {
+                    json.WriteStartArray("missingFonts");
+                    foreach (var font in file.MissingFonts)
+                        json.WriteStringValue(font);
+                    json.WriteEndArray();
+                }
                 json.WriteEndObject();
             }
             json.WriteEndArray();

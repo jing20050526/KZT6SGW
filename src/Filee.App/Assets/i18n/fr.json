@@ -71,6 +71,8 @@
   "toast.skipped": "Ignoré (le fichier existe)",
   "toast.open_folder": "Afficher",
   "toast.cancel": "Annuler",
+  "toast.missing_fonts": "Polices manquantes du document : {0}",
+  "toast.get_fonts": "Obtenir les polices",
   "download.badge": "{0}/s · {1}",
   "download.badge_files": "{0} · {1} sur {2} fichiers",
 

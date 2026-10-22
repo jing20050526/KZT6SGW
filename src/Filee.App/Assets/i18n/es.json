@@ -66,6 +66,8 @@
   "toast.skipped": "Omitido (el archivo ya existe)",
   "toast.open_folder": "Mostrar",
   "toast.cancel": "Cancelar",
+  "toast.missing_fonts": "Fuentes ausentes del documento: {0}",
+  "toast.get_fonts": "Obtener fuentes",
   "download.badge": "{0}/s · {1}",
   "download.badge_files": "{0} · {1} de {2} archivos",
   "error.unsupported_source": "Este tipo de archivo no es compatible",
