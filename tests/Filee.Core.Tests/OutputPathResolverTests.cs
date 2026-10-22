@@ -107,6 +107,15 @@ public class OutputPathResolverTests
     }
 
     [Fact]
+    public void Tokens_in_the_source_name_are_kept_as_they_are()
+    {
+        var rule = new OutputRule { FileNamePattern = "{name}_{index}" };
+        var path = OutputPathResolver.Resolve(rule, Tokens(Path.Combine("C:", "x", "Minutes {date} {Index}.docx"), 3), "pdf", _ => false);
+
+        Assert.Equal("Minutes {date} {Index}_3.pdf", Path.GetFileName(path));
+    }
+
+    [Fact]
     public void Subfolder_name_supports_tokens()
     {
         using var dir = new TempDir();
