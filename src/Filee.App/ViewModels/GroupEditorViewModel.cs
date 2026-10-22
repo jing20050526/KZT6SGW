@@ -30,7 +30,7 @@ public sealed partial class GroupEditorViewModel : ObservableObject
         _name = loc.DisplayName(group);
         foreach (var id in group.SubPresetIds)
         {
-            if (store.FindPreset(id) is { IsGroup: false, IsTool: false } preset)
+            if (store.FindPreset(id) is { IsGroup: false } preset)
                 Members.Add(MemberOf(preset));
         }
         Members.CollectionChanged += (_, _) => Refresh();
@@ -48,7 +48,7 @@ public sealed partial class GroupEditorViewModel : ObservableObject
     /// <summary>The presets the group fans out, in order.</summary>
     public ObservableCollection<GroupMember> Members { get; } = [];
 
-    /// <summary>Conversions that can still be added (not groups, not already in it).</summary>
+    /// <summary>Actions that can still be added (not groups, not already in it).</summary>
     public ObservableCollection<Choice<string>> Available { get; } = [];
 
     [ObservableProperty]
@@ -140,7 +140,7 @@ public sealed partial class GroupEditorViewModel : ObservableObject
     {
         var taken = Members.Select(m => m.PresetId).ToHashSet();
         Available.Clear();
-        foreach (var preset in _store.Presets.Where(p => !p.IsGroup && !p.IsTool && !taken.Contains(p.Id)))
+        foreach (var preset in _store.Presets.Where(p => !p.IsGroup && !taken.Contains(p.Id)))
             Available.Add(new Choice<string>(preset.Id, _loc.DisplayName(preset), CaptionOf(preset)));
         OnPropertyChanged(nameof(IsFull));
         OnPropertyChanged(nameof(IsEmpty));

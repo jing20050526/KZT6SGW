@@ -53,6 +53,21 @@ public class GroupEditorTests
     }
 
     [AvaloniaFact]
+    public void Pdf_edit_group_keeps_its_conversion_and_tool_actions_when_saved()
+    {
+        var group = BuiltInData.CreatePresets().Single(p => p.Id == "pdf-edit");
+        var vm = Edit(group);
+
+        Assert.Equal(group.SubPresetIds, vm.Members.Select(m => m.PresetId));
+        Assert.Equal(Preset.MaxSubPresets, vm.Members.Count);
+        Assert.True(vm.Apply());
+        Assert.Equal([
+            "tool-pdf-crop", "pdf-rotate-left", "pdf-rotate-right",
+            "tool-pdf-pages", "pdf-split", "tool-pdf-add",
+        ], group.SubPresetIds);
+    }
+
+    [AvaloniaFact]
     public void A_group_takes_six_presets_at_most_and_needs_a_name()
     {
         var vm = Edit(new Preset { Name = "Many", Kind = PresetKind.Group });

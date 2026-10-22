@@ -361,6 +361,15 @@ public enum PdfCompression
     Print,
 }
 
+/// <summary>A lossless turn applied to every page of a PDF.</summary>
+public enum PdfRotation
+{
+    None,
+    Left90,
+    Right90,
+    Rotate180,
+}
+
 /// <summary>PDF related options.</summary>
 public sealed class PdfOptions
 {
@@ -380,6 +389,10 @@ public sealed class PdfOptions
 
     /// <summary>For PDF → PDF: write every page as its own file.</summary>
     public bool SplitPages { get; set; }
+
+    /// <summary>For PDF → PDF: rotate every selected page without rendering it.</summary>
+    [JsonConverter(typeof(LenientEnumJsonConverter<PdfRotation>))]
+    public PdfRotation Rotation { get; set; }
 
     /// <summary>For PDF → image: stack the pages into one tall image instead of one image per page.</summary>
     public bool CombinePages { get; set; }

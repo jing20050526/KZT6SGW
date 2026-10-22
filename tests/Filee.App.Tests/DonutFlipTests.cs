@@ -634,6 +634,37 @@ public class DonutFlipTests
         }
     }, language);
 
+    /// <summary>The PDF back face exposes Edit as a slice, then fans its six tools out around that slice.</summary>
+    [AvaloniaFact]
+    public void The_pdf_edit_group_renders_as_a_subring() => With(animations: false, back: null, () =>
+    {
+        var theme = AppHost.Get<ThemeService>();
+        try
+        {
+            theme.Apply(new ThemeSettings { Mode = ThemeMode.Dark, CornerRadius = 16 }, "en");
+            Motion.Configure(true, () => false);
+            var (vm, window, donut) = OpenClickMode(@"C:\docs\report.pdf");
+
+            Assert.True(donut.HandleKey(Key.Tab));
+            Assert.True(vm.IsBackFace);
+            Assert.Equal("pdf-edit", vm.Items[0].Id);
+            Assert.Equal(6, vm.Items[0].Children!.Count);
+
+            donut.SetExternalHit(new DonutHit(DonutHitKind.Segment, 0));
+            donut.ExpandPendingGroup();
+            donut.SetExternalHit(new DonutHit(DonutHitKind.SubSegment, 0, 3));
+            RenderTests.Pump();
+            RenderTests.Save(window, "donut-pdf-edit-en.png");
+
+            Assert.Equal(DonutHitKind.SubSegment, donut.HitTest(donut.SubSliceCenter(0, 3)).Kind);
+            window.Close();
+        }
+        finally
+        {
+            theme.Apply(new ThemeSettings(), "en");
+        }
+    });
+
     /// <summary>
     /// The editor's Front / Back switch: the donut shows and edits the back face, the front stays as it was, and
     /// "Reset to default" puts the built-in back face back.

@@ -250,12 +250,12 @@ public sealed class UserDataStore
         // conversion to "group": still a group, now an empty one, rather than a conversion that can never run.
         foreach (var preset in Presets.Where(p => !p.IsGroup && p.TargetFormat == Preset.GroupTarget))
             preset.Kind = PresetKind.Group;
-        // A group fans out conversions only (no group or tool in a group), each once, at most MaxSubPresets, and has no
+        // A group fans out conversions and tools (but never another group), each once, at most MaxSubPresets, and has no
         // target format an older Filee could run it with.
-        var conversions = Presets.Where(p => !p.IsGroup && !p.IsTool).Select(p => p.Id).ToHashSet();
+        var actions = Presets.Where(p => !p.IsGroup).Select(p => p.Id).ToHashSet();
         foreach (var group in Presets.Where(p => p.IsGroup))
         {
-            group.SubPresetIds = group.SubPresetIds.Where(conversions.Contains).Distinct().Take(Preset.MaxSubPresets).ToList();
+            group.SubPresetIds = group.SubPresetIds.Where(actions.Contains).Distinct().Take(Preset.MaxSubPresets).ToList();
             group.TargetFormat = Preset.GroupTarget;
         }
 
@@ -750,6 +750,28 @@ internal static class SettingsMigrations
         // v32: logs and script source, Video CD DAT and Workbench archives learn their donuts; custom claims stay put.
         if (from < 32)
             changed |= LearnExtensions(profiles, out _, ["log", "py", "pac", "bat", "command", "dat", "wbpz"]);
+        // v33: one "Edit" slice on the back of the PDF donut fans out the common lossless page tools. Existing
+        //      customised backs keep their layout; the group is offered at the start when there is room.
+        if (from < 33)
+        {
+            var ids = new[] { "tool-pdf-crop", "tool-pdf-pages", "tool-pdf-add", "pdf-rotate-left", "pdf-rotate-right", "pdf-edit" };
+            var defaults = BuiltInData.CreatePresets();
+            foreach (var id in ids.Where(id => presets.All(p => p.Id != id)))
+            {
+                var item = defaults.Single(p => p.Id == id);
+                var at = defaults.FindIndex(p => p.Id == id);
+                var after = defaults.Take(at).Select(p => presets.FindIndex(existing => existing.Id == p.Id)).LastOrDefault(i => i >= 0, -1);
+                presets.Insert(after + 1, item);
+                changed = true;
+            }
+            if (profiles.FirstOrDefault(p => p.Id == "pdf") is { BackPresetIds: { } back } pdf
+                && !pdf.PresetIds.Contains("pdf-edit") && !back.Contains("pdf-edit")
+                && back.Count < ToolbarProfile.MaxSlices)
+            {
+                back.Insert(0, "pdf-edit");
+                changed = true;
+            }
+        }
         return changed;
     }
 

@@ -10,6 +10,9 @@ using Filee.Core.Localization;
 using Filee.Core.Presets;
 using Filee.Core.Settings;
 using ImageMagick;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 
 namespace Filee.App.Tests;
 
@@ -45,6 +48,48 @@ public class CropServiceTests
             using var cropped = new MagickImage(result.OutputPath);
             Assert.Equal((uint)50, cropped.Width);
             Assert.Equal((uint)40, cropped.Height);
+        }
+        finally
+        {
+            try { Directory.Delete(folder, true); } catch (IOException) { }
+        }
+    }
+
+    [AvaloniaFact]
+    public async Task Pdf_preview_and_crop_keep_every_page_as_a_PDF()
+    {
+        TestServices.EnsureInitialized("en");
+        var folder = Directory.CreateTempSubdirectory("filee-pdf-crop-test-").FullName;
+        try
+        {
+            var source = Path.Combine(folder, "pages.pdf");
+            using (var document = new PdfDocument())
+            {
+                foreach (var rotation in new[] { 0, 90 })
+                {
+                    var page = document.AddPage();
+                    page.Width = XUnit.FromPoint(600);
+                    page.Height = XUnit.FromPoint(800);
+                    page.Rotate = rotation;
+                }
+                document.Save(source);
+            }
+            var store = AppHost.Get<UserDataStore>();
+            var loc = AppHost.Get<ILocalizer>();
+            var preset = BuiltInData.CreatePresets().Single(p => p.Id == "tool-pdf-crop");
+            var preview = await CropService.LoadPreviewAsync(source);
+
+            var result = await CropService.CropFileAsync(source,
+                preview.Width / 10, preview.Height / 5, preview.Width / 2, preview.Height * 3 / 5,
+                preset, store, loc, originalWidth: preview.Width, originalHeight: preview.Height);
+
+            Assert.Equal(CropStatus.Success, result.Status);
+            Assert.EndsWith("pages_cropped.pdf", result.OutputPath);
+            using var cropped = PdfReader.Open(result.OutputPath!, PdfDocumentOpenMode.Import);
+            Assert.Equal(2, cropped.PageCount);
+            Assert.Equal([0, 90], cropped.Pages.Cast<PdfPage>().Select(p => p.Rotate));
+            Assert.InRange(cropped.Pages[0].CropBox.Width, 299, 301);
+            Assert.InRange(cropped.Pages[0].CropBox.Height, 479, 481);
         }
         finally
         {

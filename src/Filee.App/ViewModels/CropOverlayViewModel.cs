@@ -245,7 +245,8 @@ public sealed partial class CropOverlayViewModel : ObservableObject, IDisposable
 
         try
         {
-            var result = await CropService.CropFileAsync(path, x, y, w, h, _preset, _store, _loc, _log);
+            var result = await CropService.CropFileAsync(path, x, y, w, h, _preset, _store, _loc, _log,
+                OriginalWidth, OriginalHeight);
             if (result.Status == CropStatus.Success && result.OutputPath is not null)
             {
                 _outputs.Add(result.OutputPath);

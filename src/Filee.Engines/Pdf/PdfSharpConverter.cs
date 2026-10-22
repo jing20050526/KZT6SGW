@@ -105,7 +105,7 @@ public sealed class PdfSharpConverter : IConverter, IPdfMerger, IImageTransforme
         return [path];
     }
 
-    /// <summary>PDF → PDF: split into single pages, or extract the configured page range.</summary>
+    /// <summary>PDF → PDF: split into single pages, extract a range, or rotate the complete document in place.</summary>
     private static IReadOnlyList<string> SplitOrExtract(ConversionStep step, IProgress<double>? progress, CancellationToken ct)
     {
         using var source = Open(step.InputPath, PdfDocumentOpenMode.Import);
@@ -118,7 +118,7 @@ public sealed class PdfSharpConverter : IConverter, IPdfMerger, IImageTransforme
             {
                 ct.ThrowIfCancellationRequested();
                 using var single = new PdfDocument();
-                single.AddPage(source.Pages[pages[i]]);
+                Rotate(single.AddPage(source.Pages[pages[i]]), step.Preset.Pdf.Rotation);
                 var path = step.Output.Allocate("pdf", $"_p{pages[i] + 1}");
                 if (path is null)
                     continue;
@@ -129,15 +129,46 @@ public sealed class PdfSharpConverter : IConverter, IPdfMerger, IImageTransforme
             return written;
         }
 
+        if (pages.SequenceEqual(Enumerable.Range(0, source.PageCount)))
+        {
+            var complete = step.Output.Allocate("pdf");
+            if (complete is null)
+                return [];
+            ct.ThrowIfCancellationRequested();
+            var degrees = RotationDegrees(step.Preset.Pdf.Rotation);
+            if (degrees == 0)
+                CopyWritable(step.InputPath, complete);
+            else
+                PdfPageTools.RotateAll(step.InputPath, complete, degrees, ct);
+            progress?.Report(1);
+            return [complete];
+        }
+
         using var extract = new PdfDocument();
         foreach (var index in pages)
-            extract.AddPage(source.Pages[index]);
+            Rotate(extract.AddPage(source.Pages[index]), step.Preset.Pdf.Rotation);
         var output = step.Output.Allocate("pdf");
         if (output is null)
             return [];
         extract.Save(output);
         return [output];
     }
+
+    private static void Rotate(PdfPage page, PdfRotation rotation)
+    {
+        var degrees = RotationDegrees(rotation);
+        if (degrees != 0)
+            page.Rotate = ((page.Rotate + degrees) % 360 + 360) % 360;
+    }
+
+    private static int RotationDegrees(PdfRotation rotation) =>
+        rotation switch
+        {
+            PdfRotation.Left90 => -90,
+            PdfRotation.Right90 => 90,
+            PdfRotation.Rotate180 => 180,
+            _ => 0,
+        };
 
     /// <summary>
     /// PDF → a smaller PDF (<see cref="PdfOptions.Compression"/>), also with a page range or one file per page: the whole
@@ -162,7 +193,7 @@ public sealed class PdfSharpConverter : IConverter, IPdfMerger, IImageTransforme
                 foreach (var index in pages)
                 {
                     using var single = new PdfDocument();
-                    single.AddPage(source.Pages[index]);
+                    Rotate(single.AddPage(source.Pages[index]), options.Rotation);
                     var path = Path.Combine(scratch, $"page-{index + 1}.pdf");
                     single.Save(path);
                     parts.Add((path, $"_p{index + 1}"));
@@ -170,13 +201,22 @@ public sealed class PdfSharpConverter : IConverter, IPdfMerger, IImageTransforme
             }
             else if (pages.SequenceEqual(Enumerable.Range(0, source.PageCount)))
             {
-                parts.Add((step.InputPath, null));
+                if (options.Rotation == PdfRotation.None)
+                {
+                    parts.Add((step.InputPath, null));
+                }
+                else
+                {
+                    var path = Path.Combine(scratch, "rotated.pdf");
+                    PdfPageTools.RotateAll(step.InputPath, path, RotationDegrees(options.Rotation), ct);
+                    parts.Add((path, null));
+                }
             }
             else
             {
                 using var extract = new PdfDocument();
                 foreach (var index in pages)
-                    extract.AddPage(source.Pages[index]);
+                    Rotate(extract.AddPage(source.Pages[index]), options.Rotation);
                 var path = Path.Combine(scratch, "pages.pdf");
                 extract.Save(path);
                 parts.Add((path, null));
@@ -243,10 +283,10 @@ public sealed class PdfSharpConverter : IConverter, IPdfMerger, IImageTransforme
         var best = candidates.Select(path => new FileInfo(path)).MinBy(file => file.Length);
         if (best is not null && best.Length < original)
         {
-            File.Copy(best.FullName, output, overwrite: true);
+            CopyWritable(best.FullName, output);
             return true;
         }
-        File.Copy(plain, output, overwrite: true);
+        CopyWritable(plain, output);
         return false;
     }
 
@@ -254,7 +294,7 @@ public sealed class PdfSharpConverter : IConverter, IPdfMerger, IImageTransforme
     /// Opens a PDF to change it. One locked only against changes (it opens without a password) has its pages copied
     /// into a new PDF instead, as when pages are split or extracted: bookmarks and form fields stay behind then.
     /// </summary>
-    private static PdfDocument OpenForChanges(string path)
+    internal static PdfDocument OpenForChanges(string path)
     {
         try
         {
@@ -268,6 +308,17 @@ public sealed class PdfSharpConverter : IConverter, IPdfMerger, IImageTransforme
                 copy.AddPage(page);
             return copy;
         }
+        catch (PdfReaderException ex) when (ex.Message.Contains("password", StringComparison.OrdinalIgnoreCase))
+        {
+            throw PdfDocumentReader.PasswordProtected();
+        }
+    }
+
+    /// <summary>Copies a PDF without passing a source's read-only attribute to the generated output.</summary>
+    internal static void CopyWritable(string source, string destination)
+    {
+        File.Copy(source, destination, overwrite: true);
+        File.SetAttributes(destination, File.GetAttributes(destination) & ~FileAttributes.ReadOnly);
     }
 
     /// <summary>Opens a PDF; a password-protected one fails with the message the other PDF conversions give.</summary>

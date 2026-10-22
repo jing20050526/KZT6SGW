@@ -31,8 +31,10 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
 
     private CropOverlayWindow? _cropOverlay;
     private MergeOrderWindow? _mergeOrder;
+    private PdfPageEditorWindow? _pdfPageEditor;
 
     internal MergeOrderWindow? MergeOrder => _mergeOrder;
+    internal PdfPageEditorWindow? PdfPageEditor => _pdfPageEditor;
 
     /// <summary>Reviews the order of a PDF merge. Closing or cancelling starts no conversion.</summary>
     public async Task<IReadOnlyList<string>?> ChooseMergeOrderAsync(IReadOnlyList<string> files)
@@ -71,6 +73,28 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
                 _cropOverlay = null;
         };
         _cropOverlay = win;
+        win.Show();
+        win.Activate();
+    }
+
+    /// <summary>Opens the lossless PDF page organiser. The Add-pages action starts with its file picker open.</summary>
+    public void ShowPdfPageEditor(IReadOnlyList<string> files, Preset preset, bool addPages = false)
+    {
+        if (files.Count == 0)
+            return;
+        _pdfPageEditor?.Close();
+        var store = services.GetRequiredService<UserDataStore>();
+        var log = services.GetService<ILogger<PdfPageEditorViewModel>>();
+        var vm = new PdfPageEditorViewModel(files, preset, loc, store, log);
+        var win = new PdfPageEditorWindow { DataContext = vm };
+        win.Closed += (_, _) =>
+        {
+            if (_pdfPageEditor == win)
+                _pdfPageEditor = null;
+        };
+        if (addPages)
+            win.Opened += async (_, _) => await win.PickAndAddAsync();
+        _pdfPageEditor = win;
         win.Show();
         win.Activate();
     }
