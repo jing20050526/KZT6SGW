@@ -241,6 +241,9 @@ public sealed class AppSettings
     /// <summary>Every geospatial conversion is saved as a ZIP, whatever the preset says (see <see cref="OutputRule.ZipResult"/>).</summary>
     public bool ZipGeoResults { get; set; }
 
+    /// <summary>How large Filee's windows draw everything (Ctrl + mouse wheel, Ctrl +/-, Ctrl+0): 1 as designed.</summary>
+    public double UiScale { get; set; } = 1;
+
     /// <summary>
     /// Returns <paramref name="preset"/> itself, or a copy with the app-wide output settings applied: it saves to
     /// <see cref="DefaultOutput"/> when the preset's location is <see cref="OutputLocation.Default"/>, and keeps the
