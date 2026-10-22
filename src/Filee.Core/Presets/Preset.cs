@@ -18,8 +18,8 @@ public enum PresetKind
     Group,
 
     /// <summary>
-    /// Opens its own window on the dropped files instead of converting them (the interactive Crop). Like a group,
-    /// never offered where a conversion is picked.
+    /// Opens its own window on the dropped files instead of converting them (the interactive Crop, Cut a clip; see
+    /// <see cref="Preset.Tool"/>). Like a group, never offered where a conversion is picked.
     /// </summary>
     Tool,
 }
@@ -168,6 +168,34 @@ public sealed class Preset
     [JsonIgnore]
     public bool IsTool => Kind == PresetKind.Tool;
 
+    /// <summary><see cref="Tool"/> of the interactive crop (also a tool saved without one, from before clips).</summary>
+    public const string CropTool = "crop";
+
+    /// <summary><see cref="Tool"/> of "Cut a clip": a part of a video, chosen on a timeline.</summary>
+    public const string ClipTool = "clip";
+
+    /// <summary>
+    /// <see cref="PresetKind.Tool"/>: which window it opens, <see cref="CropTool"/> (or null, as saved before there were
+    /// other tools) or <see cref="ClipTool"/>. A tool this version doesn't know (from a newer Filee) opens nothing.
+    /// Ignored for other kinds.
+    /// </summary>
+    public string? Tool { get; set; }
+
+    /// <summary>True for the interactive crop.</summary>
+    [JsonIgnore]
+    public bool IsCropTool => IsTool && Tool is null or CropTool;
+
+    /// <summary>True for "Cut a clip".</summary>
+    [JsonIgnore]
+    public bool IsClipTool => IsTool && Tool == ClipTool;
+
+    /// <summary>
+    /// True if converting a <paramref name="sourceFormat"/> file cuts a clip of it (<see cref="MediaOptions.Clip"/>,
+    /// set by the clip window on the conversion it starts): the file is a video. Other files convert as usual.
+    /// </summary>
+    public bool CutsClipOf(string sourceFormat) =>
+        Media.Clip is { Parts.Count: > 0 } && Formats.FormatRegistry.FindById(sourceFormat)?.Category == Formats.FormatCategory.Video;
+
     /// <summary>Creates a new random preset id.</summary>
     public static string NewId() => Guid.NewGuid().ToString("N")[..12];
 
@@ -186,6 +214,7 @@ public sealed class Preset
         Trace = Trace.Clone(),
         Output = Output.Clone(),
         Kind = Kind,
+        Tool = Tool,
         SubPresetIds = [.. SubPresetIds],
     };
 }
@@ -540,13 +569,31 @@ public sealed class MediaOptions
     public int FrameInterval { get; set; } = 1;
 
     /// <summary>
+    /// "Cut a clip": cut exactly at the chosen frames by encoding the clip again (with <see cref="Quality"/>,
+    /// <see cref="MaxHeight"/>, <see cref="VideoCodec"/>, …). Off by default: the streams are copied as they are, which
+    /// takes a moment and loses nothing, but the clip starts at the key frame before the chosen start.
+    /// </summary>
+    public bool ExactCut { get; set; }
+
+    /// <summary>
+    /// A clip of a video (<see cref="Preset.CutsClipOf"/>): its parts, their volume and speed, and its fades. Set by the
+    /// clip window on the conversion it starts, never on a saved preset.
+    /// </summary>
+    public ClipEdit? Clip { get; set; }
+
+    /// <summary>
     /// Most pictures one video may become (<see cref="SaveEveryFrame"/>): about an hour at 30 fps, already more than
     /// anyone looks through. A longer video needs a larger <see cref="FrameInterval"/>.
     /// </summary>
     public const long MaxFrames = 100_000;
 
 
-    public MediaOptions Clone() => (MediaOptions)MemberwiseClone();
+    public MediaOptions Clone()
+    {
+        var copy = (MediaOptions)MemberwiseClone();
+        copy.Clip = Clip?.Clone();
+        return copy;
+    }
 }
 
 /// <summary>The kind of moving photo a video becomes (<see cref="MediaOptions.LivePhoto"/>).</summary>

@@ -1243,6 +1243,8 @@ format, and FFmpeg reads what the file holds, so a `.dat` with no video in it fa
   It is smaller than the "essentials" build (100 vs 115 MB download, 272 vs 329 MB on disk, because ffmpeg.exe and
   ffprobe.exe share their libraries) and has a superset of its encoders. It links only Windows system DLLs; GPU
   and Vulkan libraries are loaded only if present. Being over 60 MB, it is offered but not ticked on first run.
+- The Cut a clip window's preview plays its sound through `ffplay` when it sits next to Filee's FFmpeg (the gyan.dev
+  build has it); without it, the preview plays silently. Nothing else uses ffplay.
 - Container and codecs per target (`Media/MediaEncoding.cs`, every encoder checked with `ffmpeg -encoders`):
 
   | Target | Written as |

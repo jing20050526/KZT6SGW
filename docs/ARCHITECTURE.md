@@ -146,6 +146,29 @@ multi-frame pictures refused, the EXIF thumbnail dropped), one history entry for
 - `Controls/CropMath` holds the arithmetic (ratios and their portrait forms, nudging by whole pixels, the frame in
   pixels, where the size chip goes, where the dial opens) and is unit tested.
 
+## Clip window
+
+The Cut a clip tool (`tool-clip`, first on the back of the video donut) opens `Views/ClipWindow` instead of running a
+job. The window only chooses the clip; writing it is an ordinary conversion.
+
+- `Core/Presets/ClipCutter` does every edit without the window: the parts of the clip (start, end, speed, volume,
+  mute), gaps left by Delete, the blade, edge trims that take back or cut away, music on A2, fades, Remove silence and
+  undo / redo (one step per drag). The result is a `ClipEdit`, unit tested on its own.
+- `ClipWindowViewModel` holds the window's state: the overview of the whole video (`Controls/ClipTimeline`: 16
+  frames, the loudness, the handles) and the sequence under it (`Controls/ClipSequence`: V1 pictures, A1 the video's
+  sound, A2 music). Both are custom-drawn controls; their pictures and loudness are taken again only when the clip's
+  ends rest.
+- Space plays the clip as it will be written: `Engines/Media/ClipPreview` runs the same filter graph as the output,
+  the pictures as raw BGRA frames over a pipe and the sound through `ffplay` (when it sits next to Filee's FFmpeg;
+  without it the preview is silent). FFmpeg for the window runs below normal priority.
+- Save calls `ClipTool.ConversionOf`, which carries the `ClipEdit` in `MediaOptions.Clip`, so the toast, cancel, the
+  output rules (`{name}_clip` next to the video) and the history work as for any conversion. `FfmpegConverter`
+  copies one plain stretch with `-ss/-to` and `-c copy` (*Fast, no re-encoding*), or encodes the exact cut.
+- Anything else is one filter graph (`MediaEncoding.ClipGraphOf`): the video is read once, `split`/`trim` per piece,
+  `setpts` and chained `atempo` for speed, `volume`, `color`/`anullsrc` for gaps, `concat`, the music as a second
+  input (`atrim`, `volume`, `afade`, `adelay`, `amix`), then `fade`/`afade`. It is encoded with the preset's quality,
+  size and codec.
+
 ## Settings and data
 
 `UserDataStore` owns `settings.json`, `presets.json`, `profiles.json` and `history.json`
