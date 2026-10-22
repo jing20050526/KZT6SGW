@@ -55,7 +55,7 @@
   安裝程式是 Filee 自己的，使用與 Filee 相同的語言，電腦上無需另外安裝任何元件。
   安裝時可以新增檔案總管選單、登入時啟動、`filee` 命令和可選引擎。靜默安裝沿用 Inno Setup 的參數
   （`/VERYSILENT /SUPPRESSMSGBOXES`）。
-- **macOS 13 及以上**（預覽）解壓縮 `osx-arm64` 或 `osx-x64` 壓縮檔並執行 `./install.sh`。
+- **macOS 13 及以上**（預覽）解壓縮 `osx-arm64` 或 `osx-x64` 壓縮檔並執行 `./install.sh`。也可以打開 `.dmg`，把 Filee 拖到「應用程式」檔案夾（`filee` 指令只由 `install.sh` 加入）。
   目前尚未公證，首次啟動時請在系統設定 → 隱私權與安全性中按一下 **仍要打開**。
 - **Linux x64、ARM64**（Ubuntu 22.04 及以上）解壓縮後執行 `./install.sh`（無需 root，需要 Python 3）。
   拖曳手勢需要 X11，Wayland 下請使用拖放區域和檔案管理員的右鍵選單。

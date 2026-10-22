@@ -22,7 +22,8 @@ function Invoke-Checked([string]$name, [scriptblock]$command) {
 $archives = @(Get-ChildItem -LiteralPath $Packages -Filter "*-$Runtime.tar.gz")
 if ($archives.Count -ne 1) { throw "Expected one portable archive for $Runtime in $Packages, found $($archives.Count)." }
 $archive = $archives[0]
-$expected = (Get-Content -LiteralPath (Join-Path $Packages ($archive.Name.Replace('.tar.gz', '-SHA256SUMS.txt')))).Split(' ')[0]
+$expected = ((Get-Content -LiteralPath (Join-Path $Packages ($archive.Name.Replace('.tar.gz', '-SHA256SUMS.txt')))) |
+    Where-Object { $_.EndsWith("  $($archive.Name)") }).Split(' ')[0]
 if ((Get-FileHash -LiteralPath $archive.FullName -Algorithm SHA256).Hash -ne $expected) { throw 'Archive checksum mismatch.' }
 
 if (Test-Path -LiteralPath $WorkDir) { throw "$WorkDir already exists. Use a fresh folder." }

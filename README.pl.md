@@ -55,7 +55,7 @@ Pobierz z [Releases](https://github.com/KnifeLemon/Filee/releases/latest).
   Setup to własny instalator Filee, mówi w językach Filee i nie potrzebuje na komputerze niczego więcej. Może dodać menu
   Eksploratora, uruchamianie po zalogowaniu, polecenie `filee` i opcjonalne silniki; instalacja cicha przyjmuje
   przełączniki Inno Setup (`/VERYSILENT /SUPPRESSMSGBOXES`).
-- **macOS 13+** (wersja zapoznawcza): rozpakuj pakiet `osx-arm64` lub `osx-x64` i uruchom `./install.sh`.
+- **macOS 13+** (wersja zapoznawcza): rozpakuj pakiet `osx-arm64` lub `osx-x64` i uruchom `./install.sh`. Albo otwórz plik `.dmg` i przeciągnij Filee do Programów (polecenie `filee` dodaje tylko `install.sh`).
   Aplikacja nie jest jeszcze notaryzowana, więc przy pierwszym uruchomieniu zezwól na nią w Ustawienia systemowe → Prywatność i ochrona → **Otwórz mimo to**.
 - **Linux x64/ARM64** (Ubuntu 22.04+): rozpakuj pakiet i uruchom `./install.sh` (bez uprawnień roota, wymaga Pythona 3).
   Gesty przeciągania wymagają X11. W Waylandzie korzystaj ze strefy upuszczania i menu kontekstowego menedżera plików.

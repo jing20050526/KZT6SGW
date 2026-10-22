@@ -55,7 +55,7 @@ Descárgalo desde [Releases](https://github.com/KnifeLemon/Filee/releases/latest
   El instalador es el propio de Filee, está en los idiomas de Filee y no necesita nada más en el equipo. Puede añadir el menú
   del Explorador, el inicio al iniciar sesión, el comando `filee` y motores opcionales; las instalaciones silenciosas aceptan
   las opciones de Inno Setup (`/VERYSILENT /SUPPRESSMSGBOXES`).
-- **macOS 13+** (versión preliminar): descomprime el paquete `osx-arm64` u `osx-x64` y ejecuta `./install.sh`.
+- **macOS 13+** (versión preliminar): descomprime el paquete `osx-arm64` u `osx-x64` y ejecuta `./install.sh`. O abre el `.dmg` y arrastra Filee a Aplicaciones (el comando `filee` solo lo añade `install.sh`).
   Aún no está notarizado, así que la primera vez tendrás que permitir que se abra en Ajustes del Sistema → Privacidad y seguridad → **Abrir igualmente**.
 - **Linux x64/ARM64** (Ubuntu 22.04+): descomprime el paquete y ejecuta `./install.sh` (no necesita root, sí Python 3).
   Los gestos de arrastre necesitan X11. En Wayland, usa la zona de suelta y el menú contextual del gestor de archivos.

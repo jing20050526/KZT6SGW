@@ -55,7 +55,7 @@ Téléchargez Filee depuis les [Releases](https://github.com/KnifeLemon/Filee/re
   Le programme d'installation est celui de Filee, dans les langues de Filee, et ne demande rien d'autre sur le PC. Il peut ajouter le menu
   de l'Explorateur, le démarrage à l'ouverture de session, la commande `filee` et des moteurs facultatifs ; les installations silencieuses acceptent
   les options d'Inno Setup (`/VERYSILENT /SUPPRESSMSGBOXES`).
-- **macOS 13+** (préversion) : décompressez le paquet `osx-arm64` ou `osx-x64` et lancez `./install.sh`.
+- **macOS 13+** (préversion) : décompressez le paquet `osx-arm64` ou `osx-x64` et lancez `./install.sh`. Ou ouvrez le `.dmg` et faites glisser Filee dans Applications (seul `install.sh` ajoute la commande `filee`).
   L'application n'est pas encore notarisée : autorisez le premier lancement dans Réglages Système → Confidentialité et sécurité → **Ouvrir quand même**.
 - **Linux x64/ARM64** (Ubuntu 22.04+) : décompressez le paquet et lancez `./install.sh` (sans root, Python 3 requis).
   Les gestes de glisser nécessitent X11. Sous Wayland, utilisez la zone de dépôt et le menu contextuel du gestionnaire de fichiers.
