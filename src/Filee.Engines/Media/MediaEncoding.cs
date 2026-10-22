@@ -230,12 +230,15 @@ internal static class MediaEncoding
         IReadOnlySet<string>? encoders, HardwareEncoder? hardware)
     {
         var video = info.Video ?? throw new InvalidOperationException("The file has no video stream.");
-        // An input without sound is fine: the output simply has no audio track.
-        var audio = options.RemoveAudio ? null : info.Audio;
+        // An input without sound is fine: the output simply has no audio track. Every track is kept (languages,
+        // commentary, issue #396), except in containers that hold one.
+        IReadOnlyList<AudioStreamInfo> tracks = options.RemoveAudio ? []
+            : SingleAudioTargets.Contains(target) ? [.. info.AudioTracks.Take(1)]
+            : info.AudioTracks;
 
         List<string> args = [.. Common, "-i", input, "-map", "0:V:0"];
-        if (audio is not null)
-            args.AddRange(["-map", "0:a:0"]);
+        for (var i = 0; i < tracks.Count; i++)
+            args.AddRange(["-map", $"0:a:{i}"]);
 
         if (CanCopyVideo(target, video, options))
         {
@@ -258,12 +261,16 @@ internal static class MediaEncoding
             args.AddRange(VideoCodecArguments(target, VideoEncoder(target, spec.VideoCodec!, options.VideoCodec, encoders), options.Quality, video, pal));
         }
 
-        if (audio is null)
+        if (tracks.Count == 0)
             args.Add("-an");
-        else if (CanCopyAudio(target, audio, options))
-            args.AddRange(["-c:a", "copy"]);
-        else
-            args.AddRange(AudioCodecArguments(target, spec.AudioCodec, options, audio, inVideo: true));
+        for (var i = 0; i < tracks.Count; i++)
+        {
+            // Each track on its own: copied where the container takes it, else encoded for its own channel count.
+            var trackArgs = CanCopyAudio(target, tracks[i], options)
+                ? ["-c:a", "copy"]
+                : AudioCodecArguments(target, spec.AudioCodec, options, tracks[i], inVideo: true);
+            args.AddRange(tracks.Count == 1 ? trackArgs : ForAudioTrack(trackArgs, i));
+        }
 
         args.AddRange(MetadataArguments());
         args.AddRange(ContainerArguments(target));
@@ -271,6 +278,20 @@ internal static class MediaEncoding
         args.AddRange(["-max_muxing_queue_size", "4096", "-f", spec.Muxer, "-progress", "pipe:1", output]);
         return args;
     }
+
+    /// <summary>Containers that hold a single audio track: the first one is kept.</summary>
+    private static readonly HashSet<string> SingleAudioTargets = ["flv", "dv"];
+
+    /// <summary>Audio options addressed to one output track (<c>-b:a</c> → <c>-b:a:2</c>, <c>-ac</c> → <c>-ac:a:2</c>).</summary>
+    internal static IEnumerable<string> ForAudioTrack(IReadOnlyList<string> args, int track) =>
+        args.Select((arg, i) => arg switch
+        {
+            // Values are never options: only the names are addressed.
+            _ when i > 0 && args[i - 1].StartsWith('-') && !arg.StartsWith('-') => arg,
+            "-c:a" or "-b:a" or "-q:a" => $"{arg}:{track}",
+            "-ac" or "-ar" => $"{arg}:a:{track}",
+            _ => arg,
+        });
 
     /// <summary>
     /// Codecs a container takes as they are. A video whose streams are listed for the target is only rewrapped

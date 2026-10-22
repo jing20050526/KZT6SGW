@@ -71,9 +71,13 @@ internal sealed record AudioStreamInfo(int Channels, int SampleRate, string? Cod
 /// <param name="Audio">First audio stream, if any.</param>
 /// <param name="CoverStreamIndex">Index of an embedded cover picture (JPEG or PNG) such as album art, if any.</param>
 /// <param name="SubtitleStreams">Every subtitle stream in file order, null when there is none.</param>
+/// <param name="AudioStreams">Every audio stream in file order (languages, commentary), null for none or only one.</param>
 internal sealed record MediaInfo(TimeSpan? Duration, VideoStreamInfo? Video, AudioStreamInfo? Audio, int? CoverStreamIndex,
-    IReadOnlyList<SubtitleStreamInfo>? SubtitleStreams = null)
+    IReadOnlyList<SubtitleStreamInfo>? SubtitleStreams = null, IReadOnlyList<AudioStreamInfo>? AudioStreams = null)
 {
+    /// <summary>Every audio stream, in file order: <see cref="Audio"/> first.</summary>
+    public IReadOnlyList<AudioStreamInfo> AudioTracks => AudioStreams ?? (Audio is null ? [] : [Audio]);
+
     /// <summary>Every subtitle stream, in file order.</summary>
     public IReadOnlyList<SubtitleStreamInfo> Subtitles => SubtitleStreams ?? [];
 
@@ -103,6 +107,7 @@ internal sealed record MediaInfo(TimeSpan? Duration, VideoStreamInfo? Video, Aud
         AudioStreamInfo? audio = null;
         int? cover = null;
         List<SubtitleStreamInfo> subtitles = [];
+        List<AudioStreamInfo> audios = [];
         double longestStream = 0;
         if (root.TryGetProperty("streams", out var streams) && streams.ValueKind == JsonValueKind.Array)
         {
@@ -127,9 +132,10 @@ internal sealed record MediaInfo(TimeSpan? Duration, VideoStreamInfo? Video, Aud
                             Text(stream, "pix_fmt"),
                             ColorOf(stream));
                         break;
-                    case "audio" when audio is null:
-                        audio = new AudioStreamInfo((int)Number(stream, "channels"), (int)Number(stream, "sample_rate"),
-                            Text(stream, "codec_name"));
+                    case "audio":
+                        audios.Add(new AudioStreamInfo((int)Number(stream, "channels"), (int)Number(stream, "sample_rate"),
+                            Text(stream, "codec_name")));
+                        audio ??= audios[0];
                         break;
                     case "subtitle":
                         subtitles.Add(new SubtitleStreamInfo((int)Number(stream, "index"), Text(stream, "codec_name"),
@@ -143,7 +149,7 @@ internal sealed record MediaInfo(TimeSpan? Duration, VideoStreamInfo? Video, Aud
         if (seconds <= 0)
             seconds = longestStream;
         return new MediaInfo(seconds > 0 ? TimeSpan.FromSeconds(seconds) : null, video, audio, cover,
-            subtitles.Count > 0 ? subtitles : null);
+            subtitles.Count > 0 ? subtitles : null, audios.Count > 1 ? audios : null);
     }
 
     /// <summary>The colour tags of a video stream; null when it has none ("unknown" counts as none).</summary>
