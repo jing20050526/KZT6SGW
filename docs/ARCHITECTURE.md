@@ -352,3 +352,27 @@ have no semibold) instead of the app's embedded Noto fonts.
   against `MemoryRegistry`, a fake `ISetupSystem` and scratch folders, and renders every page. `/SANDBOX=<folder>`
   runs the real Setup with a registry file and all folders inside `<folder>`; `build-installer.ps1 -CheckOnly` (CI)
   installs, updates and uninstalls that way.
+
+## Linux installer and updates
+
+On Linux, Filee is distributed as a self-contained archive (`Filee-<version>-<rid>.tar.gz` for `linux-x64` and
+`linux-arm64`) containing the application, `filee-cli`, bundled conversion engines, application icon, `.desktop` launcher,
+and standalone shell scripts (`install.sh`, `uninstall.sh`).
+
+- **Installation**: `install.sh` installs for the current user into `~/.local/share/filee/application` without root,
+  creating a launcher symlink at `~/.local/bin/filee` and desktop registration at
+  `~/.local/share/applications/com.filee.app.desktop`. A `.filee-package` marker containing `com.filee.app` identifies
+  the directory as an authentic managed installation. Running without `--upgrade` refuses to overwrite an existing
+  installation.
+- **In-app updates** (`UpdateService`): Checks GitHub releases for matching `<rid>.tar.gz` and `<rid>-SHA256SUMS.txt`
+  assets. The tarball is verified against SHA-256 before extraction. Archive extraction validates that all entries stay
+  within the target directory, rejecting absolute paths, directory symlinks, and escaping links, and masks permissions to
+  standard rwx bits (excluding setuid/setgid/sticky bits).
+- **Transactional upgrade**: `UpdateAsync` stages the payload in a private directory (`~/.local/share/filee/.update-*`),
+  spawns a detached `/bin/sh` helper, and requests application shutdown (`App.Quit`). Once the old process exits, the
+  helper executes `install.sh --upgrade` (which safely moves the existing installation to a backup directory, validates the
+  new files, and rolls back on failure or signal interruption), and restarts Filee with `--background --whats-new`.
+  Output and rollback diagnostics are appended to Filee's daily log (`~/.config/Filee/logs/`). Downloaded conversion engines
+  (`~/.local/share/Filee/engines`) and user settings (`~/.config/Filee`) remain untouched.
+- **Uninstallation**: `uninstall.sh` removes the application directory, desktop launcher, and `~/.local/bin/filee` symlink
+  after verifying the `.filee-package` marker. User settings and converted files are kept.

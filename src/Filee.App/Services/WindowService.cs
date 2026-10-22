@@ -321,10 +321,13 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
     public Task MessageAsync(Window? owner, string message) => ShowMessageAsync(owner, message, destructive: false, withCancel: false);
 
     /// <summary>The in-app update failed: say so, then open the website to download the new version there.</summary>
-    public async Task ShowUpdateFailedAsync()
+    public async Task ShowUpdateFailedAsync(string? logPath = null)
     {
         _updateNotice?.Close();
-        await MessageAsync(_main is { IsVisible: true } main ? main : null, loc["update.failed_alert"]);
+        var message = loc["update.failed_alert"];
+        if (!string.IsNullOrWhiteSpace(logPath))
+            message += $"\n\nLog: {logPath}";
+        await MessageAsync(_main is { IsVisible: true } main ? main : null, message);
         services.GetRequiredService<UpdateService>().OpenDownloadPage();
     }
 
