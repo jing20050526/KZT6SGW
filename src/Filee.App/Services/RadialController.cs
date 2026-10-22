@@ -321,7 +321,7 @@ public sealed class RadialController(
             var near = _window?.Position;
             Close(animate: false);
             if (web is null)
-                windows.ShowCropOverlay(sources, preset, near);
+                ShowTool(sources, preset, near);
             else
                 _ = ShowToolForBrowserFilesAsync(web, preset, near);
             return;
@@ -373,6 +373,17 @@ public sealed class RadialController(
         var files = await conversions.SaveBrowserFilesAsync(web, (placeholder, ex) =>
             log.LogWarning(ex, "Saving {File} from a browser for {Preset} failed", Path.GetFileName(placeholder), preset.Id));
         if (files.Count > 0)
+            ShowTool(files, preset, near);
+    }
+
+    private void ShowTool(IReadOnlyList<string> files, Preset preset, PixelPoint? near)
+    {
+        if (preset.Id == "tool-sheet-studio")
+        {
+            foreach (var workbook in files.Where(file => Path.GetExtension(file).Equals(".xlsx", StringComparison.OrdinalIgnoreCase)))
+                windows.ShowSpreadsheetPrintStudio(workbook);
+        }
+        else
             windows.ShowCropOverlay(files, preset, near);
     }
 

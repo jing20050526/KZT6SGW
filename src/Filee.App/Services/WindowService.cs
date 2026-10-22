@@ -30,6 +30,9 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
     internal FormatRequestNoticeWindow? FormatRequestNotice => _formatRequestNotice;
 
     private CropOverlayWindow? _cropOverlay;
+    private readonly HashSet<SpreadsheetPrintStudioWindow> _spreadsheetStudios = [];
+
+    internal IReadOnlyCollection<SpreadsheetPrintStudioWindow> SpreadsheetStudios => _spreadsheetStudios;
     private MergeOrderWindow? _mergeOrder;
 
     internal MergeOrderWindow? MergeOrder => _mergeOrder;
@@ -73,6 +76,31 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
         _cropOverlay = win;
         win.Show();
         win.Activate();
+    }
+
+    /// <summary>Opens the non-destructive XLSX print studio. One workbook owns one window and print plan.</summary>
+    public void ShowSpreadsheetPrintStudio(string file)
+    {
+        SpreadsheetPrintStudioViewModel vm;
+        try
+        {
+            vm = ActivatorUtilities.CreateInstance<SpreadsheetPrintStudioViewModel>(services, file);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            services.GetService<ILogger<WindowService>>()?.LogWarning(ex, "Could not open spreadsheet print studio for {File}", file);
+            _ = MessageAsync(null, ex.Message);
+            return;
+        }
+        var window = new SpreadsheetPrintStudioWindow { DataContext = vm };
+        window.Closed += (_, _) =>
+        {
+            _spreadsheetStudios.Remove(window);
+            trimmer.Request();
+        };
+        _spreadsheetStudios.Add(window);
+        window.Show();
+        window.Activate();
     }
 
     /// <summary>

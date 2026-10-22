@@ -561,6 +561,23 @@ public class PresetAvailabilityTests
     }
 
     [AvaloniaFact]
+    public void Spreadsheet_print_studio_requires_xlsx_and_LibreOffice()
+    {
+        var libreOffice = new FakeConverter("libreoffice", ("xlsx", "pdf"));
+        using var f = new Fixture(libreOffice);
+        var studio = f.Preset("tool-sheet-studio");
+
+        Assert.Null(f.Availability.Check(studio, [Fixture.Format("xlsx")]));
+        Assert.Equal(f.Loc["error.unsupported_source"],
+            f.Availability.Check(studio, [Fixture.Format("ods")]));
+        Assert.Null(f.Availability.Check(studio, [Fixture.Format("xlsx"), Fixture.Format("xlsx")]));
+
+        libreOffice.Available = false;
+        Assert.Equal(f.Loc["error.no_route"],
+            f.Availability.Check(studio, [Fixture.Format("xlsx")]));
+    }
+
+    [AvaloniaFact]
     public void The_palette_session_matches_check_and_sorts_the_reasons()
     {
         using var f = new Fixture();

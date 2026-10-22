@@ -1322,6 +1322,22 @@ public class UserDataStoreTests
     }
 
     [Fact]
+    public void Version_33_libraries_get_the_spreadsheet_print_studio_on_the_back()
+    {
+        var presets = BuiltInData.CreatePresets();
+        presets.RemoveAll(p => p.Id == "tool-sheet-studio");
+        var profiles = BuiltInData.CreateProfiles();
+        profiles.Single(p => p.Id == "spreadsheets").BackPresetIds!.Remove("tool-sheet-studio");
+
+        Assert.True(SettingsMigrations.ApplyToLibrary(33, presets, profiles));
+
+        var studio = presets.Single(p => p.Id == "tool-sheet-studio");
+        Assert.Equal((PresetKind.Tool, "pdf"), (studio.Kind, studio.TargetFormat));
+        Assert.Equal("tool-sheet-studio", profiles.Single(p => p.Id == "spreadsheets").BackPresetIds![0]);
+        Assert.False(SettingsMigrations.ApplyToLibrary(33, presets, profiles));
+    }
+
+    [Fact]
     public void Back_from_an_older_Filee_tool_crop_works_again_and_keeps_the_users_changes()
     {
         // What a Filee before 26 leaves after saving: kind read as Group, TargetFormat dropped, SubPresetIds empty, the rest as it was.

@@ -90,6 +90,21 @@ public sealed class PresetAvailability
     {
         if (preset.IsTool)
         {
+            if (preset.Id == "tool-sheet-studio")
+            {
+                if (formats.Count > 0 && formats.All(format => format.Id == "xlsx"))
+                {
+                    var libreOffice = _catalog.All.FirstOrDefault(converter => converter.Id == "libreoffice");
+                    if (libreOffice?.GetStatus().IsAvailable == true)
+                        return new(PresetUse.Usable, null);
+                    var libreOfficePackage = _packages.FirstOrDefault(item => !item.IsInstalled
+                        && item.Package.ConverterIds.Contains("libreoffice"));
+                    return libreOfficePackage is not null
+                        ? new(PresetUse.NeedsPackage, _loc.Format("engine.reason.needs_package", libreOfficePackage.Name))
+                        : new(PresetUse.Unusable, _loc["error.no_route"]);
+                }
+                return new(PresetUse.Unusable, _loc["error.unsupported_source"]);
+            }
             if (formats.Count > 0 && formats.All(f => WritableSingleFrameRasterFormats.Contains(f.Id)))
                 return new(PresetUse.Usable, null);
             return new(PresetUse.Unusable, _loc["error.unsupported_source"]);

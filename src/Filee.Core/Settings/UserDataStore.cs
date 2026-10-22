@@ -750,6 +750,23 @@ internal static class SettingsMigrations
         // v32: logs and script source, Video CD DAT and Workbench archives learn their donuts; custom claims stay put.
         if (from < 32)
             changed |= LearnExtensions(profiles, out _, ["log", "py", "pac", "bat", "command", "dat", "wbpz"]);
+        // v34: a non-destructive print studio for XLSX → PDF, on the back of the spreadsheet donut. Existing custom
+        //      donuts are untouched, and a full spreadsheet donut keeps the preset in the library for manual use.
+        if (from < 34)
+        {
+            const string id = "tool-sheet-studio";
+            if (presets.All(p => p.Id != id))
+            {
+                presets.Add(BuiltInData.CreatePresets().Single(p => p.Id == id));
+                changed = true;
+            }
+            if (profiles.FirstOrDefault(p => p.Id == "spreadsheets") is { BackPresetIds: { } back }
+                && !back.Contains(id) && back.Count < ToolbarProfile.MaxSlices)
+            {
+                back.Insert(0, id);
+                changed = true;
+            }
+        }
         return changed;
     }
 
