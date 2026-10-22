@@ -465,7 +465,8 @@ public class TracingTests(EngineFixture fx) : IClassFixture<EngineFixture>
         Assert.True(checkedRoutes > 1000);
     }
 
-    private static bool IsTracing(RouteStep step) => step.Converter is VectorConverter && step.To == "svg" && step.From is not "svgz";
+    // SVGZ is unpacked and a plot file's pen moves are drawn (HpglPlot): neither is tracing.
+    private static bool IsTracing(RouteStep step) => step.Converter is VectorConverter && step.To == "svg" && step.From is not ("svgz" or "plt");
 
     /// <summary>The vector engine without its tracing edges.</summary>
     private sealed class WithoutTracing(IConverter inner) : IConverter

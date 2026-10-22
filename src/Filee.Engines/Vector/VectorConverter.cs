@@ -41,6 +41,8 @@ public sealed class VectorConverter : IConverter, IImageTransformer
         new("svgz", "dxf"),
         // Illustrator files are PDF inside (or PostScript, see ConvertIllustratorAsync).
         new("ai", "pdf"),
+        // HP-GL plot files: their pen moves as lines (HpglPlot), PDF / PNG / ... from there.
+        new("plt", "svg"),
         // Raster images are traced (other raster formats through PNG, e.g. ICNS; never vector files or documents).
         .. ImageEncoder.Readable.Select(source => new ConversionEdge(source, "svg", TraceCost, ImageSourcesOnly: true)),
     ];
@@ -54,6 +56,7 @@ public sealed class VectorConverter : IConverter, IImageTransformer
             ("ai", "pdf") => await ConvertIllustratorAsync(step, progress, cancellationToken),
             ("svg", "svgz") => await Task.Run(() => Compress(step), cancellationToken),
             ("svgz", "svg") => await Task.Run(() => Decompress(step), cancellationToken),
+            ("plt", "svg") => await Task.Run(() => Plot(step), cancellationToken),
             (_, "svg") => await Task.Run(() => RasterTracing.Run(step, progress, cancellationToken), cancellationToken),
             (_, "dxf") => await Task.Run(() => ToDxf(step, cancellationToken), cancellationToken),
             (_, "pdf") => await Task.Run(() => ToPdf(step, cancellationToken), cancellationToken),
@@ -61,6 +64,16 @@ public sealed class VectorConverter : IConverter, IImageTransformer
         };
         progress?.Report(1);
         return written;
+    }
+
+    private static IReadOnlyList<string> Plot(ConversionStep step)
+    {
+        var svg = HpglPlot.ToSvg(File.ReadAllBytes(step.InputPath));
+        var output = step.Output.Allocate("svg");
+        if (output is null)
+            return [];
+        File.WriteAllText(output, svg, new System.Text.UTF8Encoding(false));
+        return [output];
     }
 
     private static IReadOnlyList<string> ToPdf(ConversionStep step, CancellationToken ct)
