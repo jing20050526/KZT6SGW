@@ -331,6 +331,28 @@ public sealed class TriggerService : IDisposable
         _permissionWatch = null;
         try
         {
+            // Stop the native hook and let its Run thread end before disposing (#358): SharpHook's Dispose closes the
+            // event queue first and stops the hook after, so a mouse move in between throws on the hook thread, and
+            // Windows then waits for that stuck low-level hook on every mouse move until the Join below gives up.
+            if (_hook is { IsDisposed: false, IsRunning: true })
+                _hook.Stop();
+        }
+        catch (HookException ex)
+        {
+            _log.LogWarning(ex, "Could not stop the global input hook");
+            Error = ex.Message;
+            NotifyStatus();
+            return; // Keep ownership: starting a second native hook would corrupt the first one.
+        }
+        if (_hookThread is { IsAlive: true } stopping && !stopping.Join(TimeSpan.FromSeconds(5)))
+        {
+            Error = "The previous global input hook did not finish stopping. Retry after it exits.";
+            _log.LogWarning("Global input hook shutdown timed out; keeping the previous hook to prevent overlap");
+            NotifyStatus();
+            return;
+        }
+        try
+        {
             _hook?.Dispose();
         }
         catch (HookException ex)

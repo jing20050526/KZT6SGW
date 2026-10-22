@@ -46,6 +46,31 @@ public sealed class TriggerServiceLifecycleTests
     }
 
     [AvaloniaFact]
+    public async Task Input_arriving_while_the_hook_stops_is_not_refused()
+    {
+        // #358: quitting from the tray, the mouse keeps moving while the native hook stops. SharpHook's Dispose closes
+        // its event queue before stopping the hook, so such a move threw on the hook thread and stalled the cursor.
+        var provider = new DelayedProvider();
+        using var service = Create(provider, () => { });
+        service.Start();
+        Assert.True(SpinWait.SpinUntil(() => provider.Runs == 1, 2000));
+        var cancellation = TestContext.Current.CancellationToken;
+        var stopping = Task.Factory.StartNew(service.Dispose, cancellation, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        try
+        {
+            Assert.True(provider.StopRequested.Wait(2000, cancellation));
+            provider.PostMouse(EventType.MouseMoved, 10, 20, EventMask.None);
+        }
+        finally
+        {
+            provider.AllowExit.Set();
+            await stopping.WaitAsync(TimeSpan.FromSeconds(2), cancellation);
+        }
+        Assert.Null(service.Error);
+        Assert.False(service.IsRunning);
+    }
+
+    [AvaloniaFact]
     public void Repeated_retries_keep_delivering_input()
     {
         var provider = new DelayedProvider();
