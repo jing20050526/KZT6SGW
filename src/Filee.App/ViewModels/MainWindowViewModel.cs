@@ -86,7 +86,15 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
 
     /// <summary>Downloads and runs the new installer (or opens the download page in a portable copy).</summary>
     [RelayCommand]
-    private Task DownloadUpdate() => Updates.UpdateAsync();
+    private async Task DownloadUpdate()
+    {
+        if (Updates.IsBusy)
+        {
+            AppHost.Get<WindowService>().ShowUpdateProgress(Updates);
+            return;
+        }
+        await Updates.UpdateAsync();
+    }
 
     private void OnUpdatesChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {

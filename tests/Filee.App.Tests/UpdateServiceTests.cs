@@ -85,6 +85,26 @@ public class UpdateServiceTests
     }
 
     [Fact]
+    public void Release_files_picks_windows_installer_and_exact_checksums_even_when_linux_and_mac_are_present()
+    {
+        using var release = JsonDocument.Parse($$"""
+            {"tag_name": "v9.9.9", "assets": [
+              {"name": "Filee-9.9.9-linux-arm64-SHA256SUMS.txt", "size": 189, "browser_download_url": "{{Base}}Filee-9.9.9-linux-arm64-SHA256SUMS.txt"},
+              {"name": "Filee-9.9.9-linux-x64-SHA256SUMS.txt", "size": 189, "browser_download_url": "{{Base}}Filee-9.9.9-linux-x64-SHA256SUMS.txt"},
+              {"name": "Filee-9.9.9-osx-arm64-SHA256SUMS.txt", "size": 189, "browser_download_url": "{{Base}}Filee-9.9.9-osx-arm64-SHA256SUMS.txt"},
+              {"name": "Filee-9.9.9-osx-x64-SHA256SUMS.txt", "size": 189, "browser_download_url": "{{Base}}Filee-9.9.9-osx-x64-SHA256SUMS.txt"},
+              {"name": "Filee-9.9.9-SHA256SUMS.txt", "size": 189, "browser_download_url": "{{Base}}Filee-9.9.9-SHA256SUMS.txt"},
+              {"name": "Filee-9.9.9-win-Portable.zip", "size": 5000, "browser_download_url": "{{Base}}Filee-9.9.9-win-Portable.zip"},
+              {"name": "Filee-9.9.9-win-Setup.exe", "size": 6000, "browser_download_url": "{{Base}}Filee-9.9.9-win-Setup.exe"}
+            ]}
+            """);
+
+        var (installer, checksums) = UpdateService.FindFiles(release.RootElement);
+        Assert.Equal("Filee-9.9.9-win-Setup.exe", installer?.Name);
+        Assert.Equal("Filee-9.9.9-SHA256SUMS.txt", checksums?.Name);
+    }
+
+    [Fact]
     public void Release_without_files_or_with_plain_http_links_has_no_installer()
     {
         using var empty = JsonDocument.Parse("""{"tag_name": "v9.9.9"}""");
@@ -282,5 +302,32 @@ public class UpdateServiceTests
     {
         Assert.EndsWith("/releases/latest", UpdateService.LatestReleaseUrl);
         Assert.StartsWith(UpdateService.RepositoryUrl.TrimEnd('/'), UpdateService.LatestReleaseUrl);
+    }
+
+    [AvaloniaFact]
+    public void UpdateProgressWindow_tracks_download_percentage_and_status()
+    {
+        TestServices.EnsureInitialized();
+        var updates = new UpdateService(NullLogger<UpdateService>.Instance, new FakeNetwork("no network"));
+        updates.LatestVersion = "2.1.0";
+        updates.Step = UpdateStep.Downloading;
+        updates.DownloadPercent = 45;
+
+        var loc = AppHost.Get<Filee.Core.Localization.ILocalizer>();
+        var window = new Views.UpdateProgressWindow(updates, loc);
+
+        Assert.Equal(45, window.ProgressBar.Value);
+        Assert.Equal("45%", window.PercentText.Text);
+        Assert.Contains("45%", window.StatusText.Text);
+
+        updates.DownloadPercent = 90;
+        Assert.Equal(90, window.ProgressBar.Value);
+        Assert.Equal("90%", window.PercentText.Text);
+
+        updates.Step = UpdateStep.Installing;
+        Assert.True(window.ProgressBar.IsIndeterminate);
+
+        updates.Step = UpdateStep.Cancelled;
+        Assert.False(window.ProgressBar.IsVisible);
     }
 }

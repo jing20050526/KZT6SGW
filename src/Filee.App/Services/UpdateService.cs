@@ -438,7 +438,9 @@ public sealed partial class UpdateService : ObservableObject
                 continue;
             if (name.EndsWith("-win-Setup.exe", StringComparison.OrdinalIgnoreCase))
                 installer = new ReleaseFile(name, url, size);
-            else if (name.EndsWith("-SHA256SUMS.txt", StringComparison.OrdinalIgnoreCase))
+            else if (name.EndsWith("-SHA256SUMS.txt", StringComparison.OrdinalIgnoreCase) &&
+                     !name.Contains("-linux-", StringComparison.OrdinalIgnoreCase) &&
+                     !name.Contains("-osx-", StringComparison.OrdinalIgnoreCase))
                 checksums = new ReleaseFile(name, url, size);
         }
         return (installer, checksums);

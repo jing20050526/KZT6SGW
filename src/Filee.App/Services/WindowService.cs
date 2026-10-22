@@ -22,6 +22,8 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
     private ToastWindow? _toast;
     private EngineSetupWindow? _engineSetup;
     private UpdateNoticeWindow? _updateNotice;
+    private UpdateProgressWindow? _updateProgress;
+    internal UpdateProgressWindow? UpdateProgress => _updateProgress;
     private EngineUpdateNoticeWindow? _engineNotice;
     private FeedbackNoticeWindow? _feedbackNotice;
     private FormatRequestNoticeWindow? _formatRequestNotice;
@@ -194,6 +196,41 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
         };
         _updateNotice = notice;
         notice.Show();
+    }
+
+    /// <summary>Shows the update download progress dialog with a progress bar.</summary>
+    public void ShowUpdateProgress(UpdateService updates)
+    {
+        if (!updates.IsBusy && updates.Step == UpdateStep.Idle)
+            return;
+
+        if (_updateProgress is not null)
+        {
+            _updateProgress.Activate();
+            return;
+        }
+
+        _updateNotice?.Close();
+        var dialog = new UpdateProgressWindow(updates, loc);
+        if (_main is { IsVisible: true } main && main.WindowState != WindowState.Minimized)
+        {
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            dialog.Show(main);
+        }
+        else
+        {
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dialog.ShowInTaskbar = true;
+            dialog.Show();
+        }
+
+        dialog.Closed += (_, _) =>
+        {
+            if (_updateProgress == dialog)
+                _updateProgress = null;
+        };
+        _updateProgress = dialog;
+        dialog.Activate();
     }
 
     /// <summary>
