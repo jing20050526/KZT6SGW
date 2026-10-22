@@ -163,6 +163,7 @@ public static class FormatRegistry
         new("toml", "TOML", FormatCategory.Data, ["toml"]),
         new("xml", "XML", FormatCategory.Data, ["xml"]),
         new("vcf", "vCard", FormatCategory.Data, ["vcf", "vcard"]),
+        new("ics", "iCalendar", FormatCategory.Data, ["ics", "ical"]),
 
         // E-books
         new("epub", "EPUB", FormatCategory.Ebook, ["epub"]),

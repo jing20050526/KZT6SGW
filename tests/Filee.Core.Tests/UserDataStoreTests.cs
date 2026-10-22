@@ -1045,6 +1045,77 @@ public class UserDataStoreTests
     }
 
     [Fact]
+    public void Version_32_libraries_learn_icalendar_extensions_and_preset_without_overriding_user_choices()
+    {
+        using var fullDir = new TempDir();
+        var full = new UserDataStore(fullDir.Path);
+        full.Load();
+        full.Settings.SchemaVersion = 32;
+        var data = full.Profiles.Single(p => p.Id == "data");
+        data.Extensions.RemoveAll(e => e is "ics" or "ical");
+        full.Profiles.Insert(0, new ToolbarProfile { Id = "my-calendar", Name = "My calendar", Extensions = ["ics"] });
+        var fullBack = full.Profiles.Single(p => p.Id == "spreadsheets").BackPresetIds!;
+        fullBack.Remove("to-ics");
+        fullBack.AddRange(full.Presets.Select(p => p.Id).Where(id => !fullBack.Contains(id))
+            .Take(ToolbarProfile.MaxSlices - fullBack.Count));
+        var fullBackBeforeMigration = fullBack.ToList();
+        full.Presets.RemoveAll(p => p.Id == "to-ics");
+        full.SaveSettings();
+        full.SaveLibrary();
+
+        var upgradedFull = new UserDataStore(fullDir.Path);
+        upgradedFull.Load();
+        Assert.Contains("ical", upgradedFull.Profiles.Single(p => p.Id == "data").Extensions);
+        Assert.DoesNotContain("ics", upgradedFull.Profiles.Single(p => p.Id == "data").Extensions);
+        Assert.Contains("ics", upgradedFull.Profiles.Single(p => p.Id == "my-calendar").Extensions);
+        Assert.Equal(fullBackBeforeMigration, upgradedFull.Profiles.Single(p => p.Id == "spreadsheets").BackPresetIds);
+        Assert.Single(upgradedFull.Presets, p => p.Id == "to-ics");
+
+        using var roomDir = new TempDir();
+        var room = new UserDataStore(roomDir.Path);
+        room.Load();
+        room.Settings.SchemaVersion = 32;
+        foreach (var profile in room.Profiles)
+            profile.Extensions.RemoveAll(e => e is "ics" or "ical");
+        room.Profiles.Single(p => p.Id == "spreadsheets").BackPresetIds!.Remove("to-ics");
+        room.Presets.RemoveAll(p => p.Id == "to-ics");
+        room.SaveSettings();
+        room.SaveLibrary();
+
+        var upgradedRoom = new UserDataStore(roomDir.Path);
+        upgradedRoom.Load();
+        var sheets = upgradedRoom.Profiles.Single(p => p.Id == "spreadsheets").BackPresetIds!;
+        Assert.Equal(sheets.IndexOf("to-vcf") + 1, sheets.IndexOf("to-ics"));
+        Assert.Single(upgradedRoom.Presets, p => p.Id == "to-ics");
+        upgradedRoom.Profiles.Single(p => p.Id == "data").Extensions.Remove("ics");
+        upgradedRoom.SaveLibrary();
+
+        var reloadedRoom = new UserDataStore(roomDir.Path);
+        reloadedRoom.Load();
+        Assert.DoesNotContain("ics", reloadedRoom.Profiles.Single(p => p.Id == "data").Extensions);
+        Assert.Equal(1, reloadedRoom.Profiles.Single(p => p.Id == "spreadsheets").BackPresetIds!.Count(id => id == "to-ics"));
+        Assert.Single(reloadedRoom.Presets, p => p.Id == "to-ics");
+
+        using var deletedDir = new TempDir();
+        var deleted = new UserDataStore(deletedDir.Path);
+        deleted.Load();
+        deleted.Settings.SchemaVersion = 32;
+        deleted.Profiles.RemoveAll(p => p.Id == "data");
+        foreach (var profile in deleted.Profiles)
+            profile.Extensions.RemoveAll(e => e is "ics" or "ical");
+        deleted.Profiles.Single(p => p.Id == "spreadsheets").BackPresetIds!.Remove("to-ics");
+        deleted.Presets.RemoveAll(p => p.Id == "to-ics");
+        deleted.SaveSettings();
+        deleted.SaveLibrary();
+
+        var upgradedDeleted = new UserDataStore(deletedDir.Path);
+        upgradedDeleted.Load();
+        Assert.DoesNotContain(upgradedDeleted.Profiles, p => p.Id == "data");
+        Assert.DoesNotContain(upgradedDeleted.Profiles.SelectMany(p => p.Extensions), e => e is "ics" or "ical");
+        Assert.Single(upgradedDeleted.Presets, p => p.Id == "to-ics");
+    }
+
+    [Fact]
     public void Live_photo_options_survive_saving_and_unknown_kinds_read_as_none()
     {
         var preset = new Preset

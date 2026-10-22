@@ -750,6 +750,35 @@ internal static class SettingsMigrations
         // v32: logs and script source, Video CD DAT and Workbench archives learn their donuts; custom claims stay put.
         if (from < 32)
             changed |= LearnExtensions(profiles, out _, ["log", "py", "pac", "bat", "command", "dat", "wbpz"]);
+        // v33: iCalendar (.ics, .ical) on the data donut, and "iCalendar" (CSV → ICS) after "vCard" on the back of the
+        //      spreadsheets donut when it has room; custom claims stay put.
+        if (from < 33)
+        {
+            changed |= LearnExtensions(profiles, out _, ["ics", "ical"]);
+            changed |= AddCalendarPreset(presets, profiles);
+        }
+        return changed;
+    }
+
+    private static bool AddCalendarPreset(List<Preset> presets, List<ToolbarProfile> profiles)
+    {
+        var changed = false;
+        if (presets.All(p => p.Id != "to-ics"))
+        {
+            var preset = BuiltInData.DataPresets().Single(p => p.Id == "to-ics");
+            var after = presets.FindIndex(p => p.Id == "to-vcf");
+            presets.Insert(after < 0 ? presets.Count : after + 1, preset);
+            changed = true;
+        }
+
+        if (profiles.FirstOrDefault(p => p.Id == "spreadsheets") is { BackPresetIds: { } back }
+            && !back.Contains("to-ics") && back.Count < ToolbarProfile.MaxSlices)
+        {
+            var after = back.IndexOf("to-vcf");
+            var beforeZip = back.IndexOf("zip-all");
+            back.Insert(after >= 0 ? after + 1 : beforeZip >= 0 ? beforeZip : back.Count, "to-ics");
+            changed = true;
+        }
         return changed;
     }
 

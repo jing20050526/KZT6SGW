@@ -132,7 +132,7 @@
   "engine.pdf-text.description": "Extrai o texto de PDFs na ordem de leitura, também de páginas em duas colunas (sem OCR para digitalizações).",
   "engine.pdf-slides.description": "Transforma PDFs em slides do PowerPoint: cada página vira uma imagem no próprio slide (parece o PDF, não é editável), com o texto da página nas anotações do apresentador.",
   "engine.email.description": "E-mails (EML, MSG do Outlook) para HTML e texto, com remetente, destinatários e data, imagens incluídas; anexos num ZIP.\nMSG para EML. Páginas da web salvas (MHTML) para um único arquivo HTML com as imagens.",
-  "engine.data.description": "JSON, JSON Lines, YAML, TOML, XML e CSV entre si.\nContatos vCard para CSV e de volta.\nComentários são descartados. CSV guarda só tabelas.",
+  "engine.data.description": "JSON, JSON Lines, YAML, TOML, XML e CSV entre si.\nContatos vCard e eventos iCalendar para CSV e de volta.\nComentários são descartados. CSV guarda só tabelas.",
   "engine.vector.description": "SVG e SVGZ para PDF vetorial, imagens e DXF; imagens vetorizadas em SVG; arquivos do Illustrator salvos com conteúdo PDF.",
   "engine.icns.description": "Ícones de apps do macOS (ICNS) a partir de imagens e para imagens.",
   "engine.font.description": "Fontes: TTF, OTF, WOFF, WOFF2 e EOT entre si.",

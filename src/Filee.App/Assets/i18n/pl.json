@@ -132,7 +132,7 @@
   "engine.pdf-text.description": "Wyodrębnia tekst z PDF w kolejności czytania, także ze stron dwukolumnowych (bez OCR skanów).",
   "engine.pdf-slides.description": "Zamienia PDF na slajdy PowerPoint: każda strona staje się obrazem na osobnym slajdzie (wygląda jak PDF, bez edycji), a tekst strony trafia do notatek prelegenta.",
   "engine.email.description": "E-maile (EML, Outlook MSG) do HTML i tekstu z nadawcą, odbiorcami i datą, razem z obrazami; załączniki do ZIP.\nMSG do EML. Zapisane strony internetowe (MHTML) do jednego pliku HTML razem z obrazami.",
-  "engine.data.description": "JSON, JSON Lines, YAML, TOML, XML i CSV między sobą.\nKontakty vCard do CSV i z powrotem.\nKomentarze są pomijane. CSV przechowuje tylko tabele.",
+  "engine.data.description": "JSON, JSON Lines, YAML, TOML, XML i CSV między sobą.\nKontakty vCard i wydarzenia iCalendar do CSV i z powrotem.\nKomentarze są pomijane. CSV przechowuje tylko tabele.",
   "engine.vector.description": "SVG i SVGZ do wektorowego PDF, obrazów i DXF; obrazy wektoryzowane do SVG; pliki Illustratora zapisane z zawartością PDF.",
   "engine.icns.description": "Ikony aplikacji macOS (ICNS) z obrazów i do obrazów.",
   "engine.font.description": "Czcionki: TTF, OTF, WOFF, WOFF2 i EOT między sobą.",

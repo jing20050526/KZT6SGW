@@ -125,7 +125,7 @@
   "engine.pdf-text.description": "PDFのテキストを読み順に抽出します。2段組みのページにも対応します（スキャン画像のOCRには非対応）。",
   "engine.pdf-slides.description": "PDFをPowerPointのスライドに変換します。各ページを画像にし、1ページずつ別のスライドに配置します（見た目はPDFと同じですが、編集はできません）。ページ内のテキストは発表者ノートに入ります。",
   "engine.email.description": "メール（EML、Outlook MSG）を、差出人、宛先、日付、画像を含めてHTMLとテキストに変換します。添付ファイルはZIPにまとめます。\nMSGからEMLへの変換にも対応します。画像を含む保存済みのWebページ（MHTML）を、1つのHTMLファイルに変換します。",
-  "engine.data.description": "JSON、JSON Lines、YAML、TOML、XML、CSVを相互変換します。\nvCardの連絡先とCSVも相互変換できます。\nコメントは削除されます。CSVで扱えるのは表形式のデータだけです。",
+  "engine.data.description": "JSON、JSON Lines、YAML、TOML、XML、CSVを相互変換します。\nvCardの連絡先とiCalendarの予定をCSVと相互変換できます。\nコメントは削除されます。CSVで扱えるのは表形式のデータだけです。",
   "engine.vector.description": "SVGとSVGZをベクターPDF、画像、DXFに変換します。画像をトレースしてSVGを作成し、PDF互換で保存されたIllustratorファイルにも対応します。",
   "engine.icns.description": "macOSアプリのアイコン（ICNS）を画像と相互変換します。",
   "engine.font.description": "フォント形式（TTF、OTF、WOFF、WOFF2、EOT）を相互変換します。",
