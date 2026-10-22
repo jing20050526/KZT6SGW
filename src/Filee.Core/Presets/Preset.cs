@@ -409,6 +409,22 @@ public sealed class PdfOptions
     /// </summary>
     public bool CompressWithGhostscript { get; set; }
 
+    /// <summary>Text written large and faint across every page of a PDF ("DRAFT", "CONFIDENTIAL"); empty for none.</summary>
+    public string Watermark { get; set; } = "";
+
+    /// <summary>"1 / 5" at the bottom of every page of a PDF.</summary>
+    public bool PageNumbers { get; set; }
+
+    /// <summary>
+    /// A password the PDF opens with (AES-256); empty for none. Saved with the preset in the settings file, like the
+    /// rest of it.
+    /// </summary>
+    public string Password { get; set; } = "";
+
+    /// <summary>A PDF this preset writes gets a watermark, page numbers or a password (<see cref="Conversion.IPdfFinisher"/>).</summary>
+    [JsonIgnore]
+    public bool FinishesPdf => !string.IsNullOrWhiteSpace(Watermark) || PageNumbers || Password.Length > 0;
+
     public PdfOptions Clone() => (PdfOptions)MemberwiseClone();
 }
 

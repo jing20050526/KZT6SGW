@@ -105,6 +105,9 @@ public sealed partial class PresetEditorViewModel : ObservableObject
         _pageSize = PageSizes.First(p => p.Value == _edit.Pdf.PageSize);
         _compressionLevel = CompressionLevels.FirstOrDefault(c => c.Value == _edit.Pdf.Compression) ?? CompressionLevels[0];
         _compressWithGhostscript = _edit.Pdf.CompressWithGhostscript;
+        _watermark = _edit.Pdf.Watermark;
+        _pageNumbers = _edit.Pdf.PageNumbers;
+        _pdfPassword = _edit.Pdf.Password;
         _location = Locations.First(l => l.Value == _edit.Output.Location);
         _conflict = Conflicts.First(c => c.Value == _edit.Output.Conflict);
         _tiffCompression = TiffCompressions.First(t => t.Value == _edit.Image.TiffCompression);
@@ -385,6 +388,11 @@ public sealed partial class PresetEditorViewModel : ObservableObject
 
     [ObservableProperty] private bool _compressWithGhostscript;
 
+    /// <summary>A PDF target's finishing: watermark text, page numbers, a password to open it (PdfOptions).</summary>
+    [ObservableProperty] private string _watermark;
+    [ObservableProperty] private bool _pageNumbers;
+    [ObservableProperty] private string _pdfPassword;
+
     /// <summary>PDF → image: one tall image of all pages.</summary>
     [ObservableProperty] private bool _combinePages;
     [ObservableProperty] private bool _trimPageMargins;
@@ -595,6 +603,10 @@ public sealed partial class PresetEditorViewModel : ObservableObject
         pdf.SplitTallImage = SplitTallImage;
         pdf.Compression = CompressionLevel.Value;
         pdf.CompressWithGhostscript = CompressWithGhostscript;
+        // Only for a PDF target, where they are shown: a password left behind by it must not lock nothing.
+        pdf.Watermark = ShowPdfBuild ? Watermark.Trim() : "";
+        pdf.PageNumbers = ShowPdfBuild && PageNumbers;
+        pdf.Password = ShowPdfBuild ? PdfPassword : "";
         _original.Document.PdfA = PdfA;
         // Only where the option is shown, as with SaveEveryFrame below.
         _original.Document.LeaveOutPictures = ShowLeaveOutPictures && LeaveOutPictures;

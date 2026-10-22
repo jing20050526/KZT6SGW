@@ -1116,6 +1116,37 @@ public class RenderTests
         Assert.False(preset.Output.SubfolderOnlyForSeveralFiles);
     }
 
+    [AvaloniaTheory]
+    [InlineData("en")]
+    [InlineData("ko")]
+    public void Preset_editor_shows_and_saves_watermark_page_numbers_and_password(string language)
+    {
+        TestServices.EnsureInitialized(language);
+        var loc = AppHost.Get<Filee.Core.Localization.ILocalizer>();
+        var preset = Filee.Core.Presets.BuiltInData.CreatePresets().Single(p => p.Id == "merge-pdf");
+        var vm = new PresetEditorViewModel(preset, loc);
+        Assert.True(vm.ShowPdfBuild);
+        vm.Watermark = "  DRAFT ";
+        vm.PageNumbers = true;
+        vm.PdfPassword = "1234";
+
+        var window = new PresetEditorWindow { DataContext = vm, Height = 1400 };
+        window.Show();
+        Pump();
+        Save(window, $"preset-pdf-finishing-{language}.png");
+        window.Close();
+
+        Assert.True(vm.Apply());
+        Assert.Equal(("DRAFT", true, "1234"), (preset.Pdf.Watermark, preset.Pdf.PageNumbers, preset.Pdf.Password));
+        Assert.True(preset.Pdf.FinishesPdf);
+
+        // Not for other targets: nothing is kept behind them.
+        vm = new PresetEditorViewModel(preset, loc);
+        vm.Target = vm.Targets.Single(t => t.Value == "png");
+        Assert.True(vm.Apply());
+        Assert.False(preset.Pdf.FinishesPdf);
+    }
+
     [AvaloniaFact]
     public void Preset_editor_keeps_rotation_visible_for_pdf_and_drops_it_for_targets_that_cannot_turn()
     {

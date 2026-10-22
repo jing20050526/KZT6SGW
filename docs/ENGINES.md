@@ -686,6 +686,21 @@ PDFsharp and Magick.NET; nothing has to be installed.
 - **Not done**: object streams (PDFsharp writes none), font subsetting or removal of unused glyphs, converting
   colour to gray, flattening transparency or form fields, recompressing JBIG2/CCITT scans.
 
+## PDF watermark, page numbers and password
+
+A preset that writes PDF can finish every PDF it makes (`PdfOptions.Watermark`, `PageNumbers`, `Password`;
+`Pdf/PdfFinishing.cs`, PDFsharp only). `JobQueue` runs it (`IPdfFinisher`) on each PDF a file became, whichever engine
+wrote it (PDFsharp, rhwp, LibreOffice, Ghostscript …), and once on a merged PDF, so its pages are numbered through.
+
+- **Watermark**: the text in light grey (22 % opacity), bold, along the page's diagonal over the content, at 70 % of
+  the diagonal and at most a quarter of the short side high.
+- **Page numbers**: "3 / 10", 9 pt dark grey, centred 10 mm above the bottom edge.
+- Text is drawn as glyph outlines (`Vector/GlyphOutlines.cs`, HarfBuzz shaping, shared with SVG text in PDFs). Any
+  script works with a font the PC has for it (Skia's font fallback, else Arial or the default face), and no font is
+  embedded, so the PDF grows by a few kilobytes. The text can't be selected or searched.
+- **Password**: opens the PDF (user and owner password are the same), AES-256 (`SetEncryptionToV5`). It is saved with
+  the preset in the settings file. A password makes a PDF/A no longer conform, since PDF/A forbids encryption.
+
 ## Office Open XML variants
 
 `Office/OoxmlConverter.cs` converts between the variants of a family (Word, Excel, PowerPoint) by copying the

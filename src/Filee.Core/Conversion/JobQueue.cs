@@ -226,6 +226,15 @@ public sealed class JobQueue : IAsyncDisposable
     }
 
     /// <summary>Converts every file to PDF in the work directory, then merges them into one output.</summary>
+    /// <summary>Applies the preset's PDF finishing (<see cref="PdfOptions.FinishesPdf"/>) to the PDFs among <paramref name="outputs"/>.</summary>
+    private async Task FinishPdfsAsync(Preset preset, IReadOnlyList<string> outputs, CancellationToken ct)
+    {
+        if (!preset.Pdf.FinishesPdf || _catalog.All.OfType<IPdfFinisher>().FirstOrDefault() is not { } finisher)
+            return;
+        foreach (var pdf in outputs.Where(o => FormatRegistry.Detect(o)?.Id == "pdf"))
+            await finisher.FinishAsync(pdf, preset.Pdf, ct);
+    }
+
     private async Task RunMergedAsync(ConversionJob job, RoutePlanner planner, string workDir)
     {
         var parts = new string?[job.Files.Count];
@@ -266,6 +275,8 @@ public sealed class JobQueue : IAsyncDisposable
         try
         {
             await _pdfMerger!.MergeAsync(inputs, output, job.CancellationToken);
+            // Once for the merged PDF, so its pages are numbered through.
+            await FinishPdfsAsync(job.Preset, [output], job.CancellationToken);
         }
         catch
         {
@@ -578,6 +589,10 @@ public sealed class JobQueue : IAsyncDisposable
                 }
                 inputs = outputs;
             }
+
+            // Watermark, page numbers, password: on every PDF this file became, from whichever engine.
+            if (finalOutput && job.Preset.TargetFormat == "pdf")
+                await FinishPdfsAsync(job.Preset, inputs, ct);
 
             if (zipResult && inputs.Count > 0)
                 inputs = PackZip(job, file, index, inputs, ct);

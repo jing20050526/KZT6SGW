@@ -1,5 +1,6 @@
 // Builds PDFs from images, splits / extracts PDF pages, merges PDFs and makes PDFs smaller (PDFsharp, MIT; the
-// compression itself is in PdfCompressor, with Ghostscript as an optional second try).
+// compression itself is in PdfCompressor, with Ghostscript as an optional second try). It also finishes every PDF a
+// job writes with a watermark, page numbers or a password (PdfFinishing).
 
 using Filee.Core.Conversion;
 using Filee.Core.Presets;
@@ -14,7 +15,7 @@ using PdfSharp.Pdf.IO;
 namespace Filee.Engines.Pdf;
 
 /// <summary>Image → PDF, PDF → PDF (split / page range / compression) and PDF merging.</summary>
-public sealed class PdfSharpConverter : IConverter, IPdfMerger, IImageTransformer
+public sealed class PdfSharpConverter : IConverter, IPdfMerger, IPdfFinisher, IImageTransformer
 {
     private const double PointsPerInch = 72.0;
     private const double MillimetresPerInch = 25.4;
@@ -38,6 +39,10 @@ public sealed class PdfSharpConverter : IConverter, IPdfMerger, IImageTransforme
         step.From != "pdf" ? Task.Run(() => ImageToPdf(step, progress, cancellationToken), cancellationToken)
         : step.Preset.Pdf.Compression == PdfCompression.None ? Task.Run(() => SplitOrExtract(step, progress, cancellationToken), cancellationToken)
         : Task.Run(() => CompressAsync(step, progress, cancellationToken), cancellationToken);
+
+    /// <summary>Watermark, page numbers and password (PdfFinishing).</summary>
+    public Task FinishAsync(string path, PdfOptions options, CancellationToken cancellationToken) =>
+        Task.Run(() => PdfFinishing.Finish(path, options, cancellationToken), cancellationToken);
 
     public Task MergeAsync(IReadOnlyList<string> inputPaths, string outputPath, CancellationToken cancellationToken) =>
         Task.Run(() =>
@@ -254,7 +259,7 @@ public sealed class PdfSharpConverter : IConverter, IPdfMerger, IImageTransforme
     /// Opens a PDF to change it. One locked only against changes (it opens without a password) has its pages copied
     /// into a new PDF instead, as when pages are split or extracted: bookmarks and form fields stay behind then.
     /// </summary>
-    private static PdfDocument OpenForChanges(string path)
+    internal static PdfDocument OpenForChanges(string path)
     {
         try
         {

@@ -188,6 +188,17 @@ public interface IPdfMerger
 }
 
 /// <summary>
+/// Adds a watermark and page numbers to a finished PDF and locks it with a password
+/// (<see cref="Presets.PdfOptions.FinishesPdf"/>). Implemented by the PDF engine; <see cref="JobQueue"/> runs it on
+/// every PDF a job writes, whichever engine made it, and on a merged PDF once, after merging.
+/// </summary>
+public interface IPdfFinisher
+{
+    /// <summary>Rewrites <paramref name="path"/> in place.</summary>
+    Task FinishAsync(string path, Presets.PdfOptions options, CancellationToken cancellationToken);
+}
+
+/// <summary>
 /// Writes TIFF pages (and every page of multi-page TIFFs) into one multi-page TIFF, in order. Implemented by the
 /// ImageMagick engine; <see cref="JobQueue"/> uses it when a preset sets <see cref="Presets.ImageOptions.MultiPageTiff"/>.
 /// </summary>

@@ -358,6 +358,21 @@
           </StackPanel>
         </Grid>
         <CheckBox Content="{DynamicResource presets.pdfa}" IsChecked="{Binding PdfA}" IsVisible="{Binding ShowDocument}" />
+        <!-- Finishing of every PDF the preset writes: watermark, page numbers, password -->
+        <StackPanel Spacing="10" IsVisible="{Binding ShowPdfBuild}">
+          <Grid ColumnDefinitions="*,12,*">
+            <StackPanel>
+              <TextBlock Classes="label" Text="{DynamicResource presets.watermark}" />
+              <TextBox Text="{Binding Watermark}" PlaceholderText="{DynamicResource presets.watermark_hint}" MaxLength="60" />
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+              <TextBlock Classes="label" Text="{DynamicResource presets.pdf_password}" />
+              <TextBox Text="{Binding PdfPassword}" PasswordChar="•" Classes="revealPasswordButton" MaxLength="64" />
+            </StackPanel>
+          </Grid>
+          <TextBlock Classes="caption" TextWrapping="Wrap" Text="{DynamicResource presets.pdf_password_hint}" />
+          <CheckBox Content="{DynamicResource presets.page_numbers}" IsChecked="{Binding PageNumbers}" />
+        </StackPanel>
       </StackPanel>
     </Border>
 
