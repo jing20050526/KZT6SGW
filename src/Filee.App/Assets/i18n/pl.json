@@ -26,6 +26,7 @@
 
   "home.title": "Start",
   "home.drop_title": "Upuść pliki tutaj",
+  "home.drop_select": "Kliknij dwukrotnie, aby wybrać pliki",
   "home.drop_hint": "Albo przytrzymaj {0}, przeciągając pliki w Eksploratorze. Pasek-pierścień otworzy się przy kursorze.",
   "home.drop_hint_macos": "Albo przytrzymaj {0}, przeciągając pliki w Finderze. Pasek-pierścień otworzy się przy kursorze.",
   "home.drop_hint_linux": "Albo przytrzymaj {0}, przeciągając pliki w menedżerze plików. Pasek-pierścień otworzy się przy kursorze.",

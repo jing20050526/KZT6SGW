@@ -26,6 +26,7 @@
 
   "home.title": "首頁",
   "home.drop_title": "將檔案拖放到這裡",
+  "home.drop_select": "按兩下選取檔案",
   "home.drop_hint": "或在檔案總管中按住 {0} 拖曳檔案，環形工具列會在游標處開啟。",
   "home.drop_hint_macos": "或在 Finder 中按住 {0} 拖曳檔案，環形工具列會在游標處開啟。",
   "home.drop_hint_linux": "或在檔案管理員中按住 {0} 拖曳檔案，環形工具列會在游標處開啟。",

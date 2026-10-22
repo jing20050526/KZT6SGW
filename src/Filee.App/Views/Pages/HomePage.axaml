@@ -54,8 +54,9 @@
       </DockPanel>
     </Border>
 
-    <!-- Drop zone: files dropped here open the donut toolbar at the cursor. -->
+    <!-- Drop zone: files dropped here open the donut toolbar at the cursor. Double-click opens file selector. -->
     <Border x:Name="DropZone" DragDrop.AllowDrop="True" MinHeight="220"
+            Cursor="Hand" ToolTip.Tip="{DynamicResource home.drop_select}"
             Background="{DynamicResource AccentFaintBrush}" BorderBrush="{DynamicResource AccentSoftBrush}"
             BorderThickness="2" CornerRadius="{DynamicResource SoftRadiusLarge}" Padding="24">
       <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">

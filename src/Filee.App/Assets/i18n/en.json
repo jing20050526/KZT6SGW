@@ -26,6 +26,7 @@
 
   "home.title": "Home",
   "home.drop_title": "Drop files here",
+  "home.drop_select": "Double-click to select files",
   "home.drop_hint": "Or hold {0} while dragging files in Explorer. The donut toolbar opens at your cursor.",
   "home.drop_hint_macos": "Or hold {0} while dragging files in Finder. The donut toolbar opens at your cursor.",
   "home.drop_hint_linux": "Or hold {0} while dragging files in your file manager. The donut toolbar opens at your cursor.",

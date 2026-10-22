@@ -23,6 +23,7 @@
   "close.dont_ask": "No volver a preguntar",
   "home.title": "Inicio",
   "home.drop_title": "Suelta archivos aquí",
+  "home.drop_select": "Doble clic para seleccionar archivos",
   "home.drop_hint": "O mantén {0} mientras arrastras archivos en el Explorador. El menú circular se abre donde esté el cursor.",
   "home.drop_hint_macos": "O mantén {0} mientras arrastras archivos en Finder. El menú circular se abre donde esté el cursor.",
   "home.drop_hint_linux": "O mantén {0} mientras arrastras archivos en tu gestor de archivos. El menú circular se abre donde esté el cursor.",
