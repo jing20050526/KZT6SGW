@@ -44,12 +44,17 @@ public static class EngineDownloads
         new("ghostscript", OperatingSystem.IsWindows() ? ["ghostscript", "vcruntime"] : ["ghostscript"], 31_000_000, ["ghostscript"]),
         new("ffmpeg", ["ffmpeg"], 272_000_000, ["ffmpeg"]),
         new("calibre", ["calibre"], 663_000_000, ["calibre"]),
+        // No Filee-hosted download on any platform yet (Tesseract's Linux/macOS builds are dynamically linked
+        // against leptonica/libpng/etc., not xcopy-deployable the way FFmpeg's static builds are): install it with
+        // the OS's own package manager or installer, then "Use my copy…", same as Ghostscript on macOS and Linux.
+        new("tesseract", [], 30_000_000, ["image-ocr"]),
     ];
 
     /// <summary>Total download size of a package in bytes.</summary>
     public static long DownloadSize(EnginePackage package) => package.Components.Sum(c => Components.GetValueOrDefault(c)?.Size ?? 0);
 
-    public static bool CanDownload(EnginePackage package) => package.Components.Count > 0 && package.Components.All(Components.ContainsKey);
+    public static bool CanDownload(EnginePackage package) =>
+        package.Components.Count > 0 && package.Components.All(Components.ContainsKey);
 
     public static string? UnavailableReason(EnginePackage package)
     {
@@ -61,6 +66,7 @@ public static class EngineDownloads
                 "ffmpeg" => "Install FFmpeg with Homebrew (brew install ffmpeg), then check again or select its bin folder.",
                 "ghostscript" => "Install Ghostscript with Homebrew (brew install ghostscript), then check again or select its bin folder.",
                 "calibre" => "The calibre Filee downloads needs macOS 14 or later. Install calibre 7.26 from calibre-ebook.com and select its .app folder.",
+                "tesseract" => "Install Tesseract with Homebrew (brew install tesseract tesseract-lang for every language), then check again or select its bin folder. Apple Vision already recognizes English, CJK and a few other languages without it.",
                 _ => $"No Filee download is available for {RuntimeIdentifier}. Install {package.Id} for this Mac and select its program or .app folder.",
             };
         if (OperatingSystem.IsLinux())
@@ -68,8 +74,11 @@ public static class EngineDownloads
             {
                 "libreoffice" => "Install LibreOffice using your distribution's package manager (Ubuntu/Debian: sudo apt install libreoffice), then check again. HWP import through LibreOffice also needs Java and the H2Orestart extension.",
                 "ghostscript" => "Install Ghostscript using your distribution's package manager (Ubuntu/Debian: sudo apt install ghostscript), then check again.",
+                "tesseract" => "Install Tesseract using your distribution's package manager (Ubuntu/Debian: sudo apt install tesseract-ocr, plus tesseract-ocr-<lang> for each language, e.g. tesseract-ocr-nep), then check again. Linux has no built-in OCR, so this is required for OCR to work at all.",
                 _ => $"No Filee download is available for {RuntimeIdentifier}. Install {package.Id} using your distribution's package manager and select its program folder.",
             };
+        if (package.Id == "tesseract")
+            return "Install Tesseract from https://github.com/UB-Mannheim/tesseract (ticking the languages you need), then check again or select its install folder.";
         return $"No Filee download is available for {RuntimeIdentifier}. Select a compatible installed copy.";
     }
 

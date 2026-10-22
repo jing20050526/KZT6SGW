@@ -423,6 +423,16 @@ public sealed class DocumentOptions
     /// </summary>
     public bool LeaveOutPictures { get; set; }
 
+    /// <summary>
+    /// Optical Character Recognition for scanned pages and images.
+    /// </summary>
+    public bool Ocr { get; set; } = true;
+
+    /// <summary>
+    /// Optical Character Recognition language code (e.g. "en-US", "ko-KR"). Null uses the system default.
+    /// </summary>
+    public string? OcrLanguage { get; set; }
+
     public DocumentOptions Clone() => (DocumentOptions)MemberwiseClone();
 }
 

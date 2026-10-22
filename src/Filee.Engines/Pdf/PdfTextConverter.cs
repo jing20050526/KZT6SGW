@@ -40,7 +40,7 @@ public sealed class PdfTextConverter : IConverter
     private static IReadOnlyList<string> Text(ConversionStep step, IProgress<double>? progress, CancellationToken cancellationToken)
     {
         progress?.Report(0.1);
-        var text = PdfDocumentReader.PlainText(PdfDocumentReader.ReadText(step.InputPath));
+        var text = PdfDocumentReader.PlainText(PdfDocumentReader.ReadText(step.InputPath, null, step.Preset.Document.OcrLanguage, step.Preset.Document.Ocr));
         cancellationToken.ThrowIfCancellationRequested();
         if (text.Length == 0)
             throw NoText();
@@ -59,8 +59,8 @@ public sealed class PdfTextConverter : IConverter
         progress?.Report(0.1);
         var textOnly = step.Preset.Document.LeaveOutPictures;
         var document = textOnly
-            ? PdfDocumentReader.ReadText(step.InputPath)
-            : PdfDocumentReader.Read(step.InputPath, Path.Combine(step.WorkDirectory, $"media-{Guid.NewGuid():N}"));
+            ? PdfDocumentReader.ReadText(step.InputPath, null, step.Preset.Document.OcrLanguage, step.Preset.Document.Ocr)
+            : PdfDocumentReader.Read(step.InputPath, Path.Combine(step.WorkDirectory, $"media-{Guid.NewGuid():N}"), null, step.Preset.Document.OcrLanguage, step.Preset.Document.Ocr);
         cancellationToken.ThrowIfCancellationRequested();
         if (textOnly && PdfDocumentReader.PlainText(document).Length == 0)
             throw NoText();

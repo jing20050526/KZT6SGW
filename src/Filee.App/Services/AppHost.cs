@@ -4,6 +4,7 @@ using Filee.App.Services.Triggers;
 using Filee.App.ViewModels;
 using Filee.Core.Conversion;
 using Filee.Core.Localization;
+using Filee.Core.Ocr;
 using Filee.Core.Platform;
 using Filee.Core.Settings;
 using Filee.Core.Web;
@@ -48,6 +49,8 @@ public static class AppHost
         services.AddSingleton<ElevationService>();
 
         // Conversion engines
+        if (OperatingSystem.IsMacOS())
+            OcrEngineRegistry.Register(new MacOsVisionOcrEngine());
         services.AddSingleton(_ => new EngineEnvironment(dataDir));
         services.AddSingleton(sp => EngineRegistry.CreateAll(sp.GetRequiredService<EngineEnvironment>(), sp.GetRequiredService<ILoggerFactory>()));
         services.AddSingleton(sp => new ConverterCatalog(sp.GetRequiredService<IReadOnlyList<IConverter>>()));

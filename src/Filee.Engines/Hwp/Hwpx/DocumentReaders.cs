@@ -4,6 +4,7 @@
 
 using System.Text;
 using System.Text.Json.Nodes;
+using Filee.Core.Presets;
 using Filee.Engines.Ebooks;
 using Filee.Engines.Email;
 using Filee.Engines.Hwp.Hwpx.Docx;
@@ -105,9 +106,15 @@ internal static class DocumentReaders
 
     /// <summary>Reads <paramref name="path"/> (of format <paramref name="format"/>) into the document model.</summary>
     /// <param name="workDirectory">Scratch folder of the job: extracted pictures go into a new folder inside it.</param>
-    public static async Task<HDocument> ReadAsync(string path, string format, string workDirectory, CancellationToken cancellationToken)
+    public static async Task<HDocument> ReadAsync(string path, string format, string workDirectory, CancellationToken cancellationToken, Preset? preset = null)
     {
         var media = Path.Combine(workDirectory, $"media-{Guid.NewGuid():N}");
+        if (format.Equals("pdf", StringComparison.OrdinalIgnoreCase))
+        {
+            var enableOcr = preset?.Document.Ocr ?? true;
+            var ocrLang = preset?.Document.OcrLanguage;
+            return await Task.Run(() => PdfDocumentReader.Read(path, media, null, ocrLang, enableOcr), cancellationToken);
+        }
         if (BuiltIn.TryGetValue(format, out var reader))
             return await Task.Run(() => reader(path, media), cancellationToken);
         if (ThroughPandoc.TryGetValue(format, out var pandocReader))

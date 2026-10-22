@@ -44,7 +44,9 @@ public sealed partial class EnginePackageState : ObservableObject
 
     public string Sizes => EngineDownloads.CanDownload(Package)
         ? _loc.Format("engines.package.size", FormatBytes(EngineDownloads.DownloadSize(Package)), FormatBytes(Package.InstalledSize))
-        : _loc["engines.package.system_required"];
+        : CanSystemInstall(Package)
+            ? _loc.Format("engines.package.size", FormatBytes(350_000_000), FormatBytes(Package.InstalledSize))
+            : _loc["engines.package.system_required"];
 
     /// <summary>
     /// How to get an engine Filee doesn't download on this system (FFmpeg and Ghostscript from Homebrew on macOS,
@@ -54,7 +56,7 @@ public sealed partial class EnginePackageState : ObservableObject
     {
         get
         {
-            if (EngineDownloads.CanDownload(Package))
+            if (EngineDownloads.CanDownload(Package) || CanSystemInstall(Package))
                 return null;
             var system = OperatingSystem.IsMacOS() ? "macos" : OperatingSystem.IsLinux() ? "linux" : "windows";
             var key = $"engines.guidance.{system}.{Package.Id}";
@@ -114,7 +116,7 @@ public sealed partial class EnginePackageState : ObservableObject
 
     /// <summary>The engine is there: Filee's download or the user's own copy.</summary>
     public bool IsInstalled => Status is EnginePackageStatus.Installed or EnginePackageStatus.OwnCopy;
-    public bool CanRemove => Status == EnginePackageStatus.Installed;
+    public bool CanRemove => Status == EnginePackageStatus.Installed || (Package.Id == "tesseract" && Status == EnginePackageStatus.OwnCopy && FromSystem);
     /// <summary>The user chose this copy ("Stop using it" applies).</summary>
     public bool UsesOwnCopy => Status == EnginePackageStatus.OwnCopy && !FromSystem;
     public bool ShowsCopyFolder => Status == EnginePackageStatus.OwnCopy;
@@ -122,8 +124,33 @@ public sealed partial class EnginePackageState : ObservableObject
                                  || (Status == EnginePackageStatus.OwnCopy && FromSystem);
     public bool IsBusy => Status is EnginePackageStatus.Queued or EnginePackageStatus.Downloading or EnginePackageStatus.Unpacking;
     /// <summary>Also when a copy on the PC is used: Filee's download is the tested version and wins once installed.</summary>
-    public bool CanInstall => EngineDownloads.CanDownload(Package) && (Status is EnginePackageStatus.NotInstalled or EnginePackageStatus.Failed
-                              || (Status == EnginePackageStatus.OwnCopy && FromSystem));
+    public bool CanInstall => (EngineDownloads.CanDownload(Package) && (Status is EnginePackageStatus.NotInstalled or EnginePackageStatus.Failed || (Status == EnginePackageStatus.OwnCopy && FromSystem)))
+                              || (CanSystemInstall(Package) && Status is EnginePackageStatus.NotInstalled or EnginePackageStatus.Failed);
+
+    /// <summary>
+    /// Whether the app can drive an in-place install of <paramref name="package"/> on this machine: Homebrew on
+    /// macOS, winget on Windows. Linux has no handler here (package managers vary too much to drive one
+    /// generically), so it keeps the same guidance-text + "Use my copy…" flow as every other engine.
+    /// </summary>
+    internal static bool CanSystemInstall(EnginePackage package) =>
+        package.Id == "tesseract" && (OperatingSystem.IsMacOS() ? LocateBrew() is not null : OperatingSystem.IsWindows());
+
+    /// <summary>Homebrew's own binary, at its two standard prefixes or on PATH; null when it isn't installed.</summary>
+    internal static string? LocateBrew()
+    {
+        if (File.Exists("/opt/homebrew/bin/brew")) return "/opt/homebrew/bin/brew";
+        if (File.Exists("/usr/local/bin/brew")) return "/usr/local/bin/brew";
+        var path = Environment.GetEnvironmentVariable("PATH");
+        if (path is not null)
+        {
+            foreach (var part in path.Split(':'))
+            {
+                var candidate = Path.Combine(part, "brew");
+                if (File.Exists(candidate)) return candidate;
+            }
+        }
+        return null;
+    }
 
     public string StatusText => Status switch
     {
@@ -258,32 +285,40 @@ public sealed class EngineDownloadService
             await _oneAtATime.WaitAsync(cancellation.Token);
             try
             {
-                // Progress<T> reports on the UI thread it was created on.
-                var clock = Stopwatch.StartNew();
-                var rate = new TransferRate();
-                var progress = new Progress<EngineInstallProgress>(p =>
+                if (state.Package.Id == "tesseract" && !EngineDownloads.CanDownload(state.Package))
                 {
-                    if (!state.IsBusy)
-                        return;
-                    state.Status = p.Stage == EngineInstallStage.Downloading ? EnginePackageStatus.Downloading : EnginePackageStatus.Unpacking;
-                    state.Progress = p.Fraction * 100;
-                    if (p.Stage == EngineInstallStage.Downloading && p.BytesTotal > 0)
+                    await InstallTesseractSystemAsync(state, cancellation.Token);
+                }
+                else
+                {
+                    // Progress<T> reports on the UI thread it was created on.
+                    var clock = Stopwatch.StartNew();
+                    var rate = new TransferRate();
+                    var progress = new Progress<EngineInstallProgress>(p =>
                     {
-                        rate.Add(clock.Elapsed, p.BytesDone);
-                        state.ShowTransfer(p.BytesDone, p.BytesTotal, rate);
-                    }
-                    else
-                    {
-                        state.ProgressDetail = "";
-                    }
-                });
-                await Task.Run(() => _installer.InstallAsync(state.Package, progress, cancellation.Token), cancellation.Token);
+                        if (!state.IsBusy)
+                            return;
+                        state.Status = p.Stage == EngineInstallStage.Downloading ? EnginePackageStatus.Downloading : EnginePackageStatus.Unpacking;
+                        state.Progress = p.Fraction * 100;
+                        if (p.Stage == EngineInstallStage.Downloading && p.BytesTotal > 0)
+                        {
+                            rate.Add(clock.Elapsed, p.BytesDone);
+                            state.ShowTransfer(p.BytesDone, p.BytesTotal, rate);
+                        }
+                        else
+                        {
+                            state.ProgressDetail = "";
+                        }
+                    });
+                    await Task.Run(() => _installer.InstallAsync(state.Package, progress, cancellation.Token), cancellation.Token);
+                }
             }
             finally
             {
                 _oneAtATime.Release();
             }
-            state.Status = EnginePackageStatus.Installed;
+            EngineEnvironment.ForgetSystemCopies();
+            state.Status = StatusOf(state);
             _catalog.Refresh();
             if (state.Package.ConverterIds.Contains("libreoffice"))
                 WarmUpInBackground(TimeSpan.Zero);
@@ -297,6 +332,142 @@ public sealed class EngineDownloadService
             _logger.LogError(ex, "Installing engine package {Package} failed", state.Package.Id);
             state.Error = ex is HttpRequestException ? ex.Message : ex.GetBaseException().Message;
             state.Status = EnginePackageStatus.Failed;
+        }
+        finally
+        {
+            state.Cancellation = null;
+            state.ProgressDetail = "";
+        }
+    }
+
+    private static async Task InstallTesseractSystemAsync(EnginePackageState state, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (OperatingSystem.IsMacOS())
+            {
+                var brew = EnginePackageState.LocateBrew();
+                if (brew is null)
+                    throw new InvalidOperationException("Homebrew was not found. Install Homebrew from https://brew.sh first.");
+
+                state.Status = EnginePackageStatus.Downloading;
+                state.Progress = 5;
+                state.ProgressDetail = "Starting Homebrew install...";
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = brew,
+                    ArgumentList = { "install", "tesseract", "tesseract-lang" },
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                var brewDir = Path.GetDirectoryName(brew);
+                var currentPath = Environment.GetEnvironmentVariable("PATH") ?? "";
+                if (brewDir is not null && !currentPath.Contains(brewDir))
+                    psi.Environment["PATH"] = brewDir + ":" + currentPath;
+                psi.Environment["HOMEBREW_NO_AUTO_UPDATE"] = "1";
+                psi.Environment["HOMEBREW_NO_ENV_HINTS"] = "1";
+
+                using var process = new Process { StartInfo = psi };
+                process.OutputDataReceived += (_, e) =>
+                {
+                    if (!string.IsNullOrWhiteSpace(e.Data))
+                    {
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            var line = e.Data.Trim();
+                            state.ProgressDetail = line;
+                            if (line.StartsWith("==> Downloading", StringComparison.OrdinalIgnoreCase))
+                            {
+                                state.Status = EnginePackageStatus.Downloading;
+                                if (state.Progress < 50) state.Progress += 10;
+                            }
+                            else if (line.StartsWith("==> Pouring", StringComparison.OrdinalIgnoreCase) ||
+                                     line.StartsWith("==> Installing", StringComparison.OrdinalIgnoreCase))
+                            {
+                                state.Status = EnginePackageStatus.Unpacking;
+                                if (state.Progress < 90) state.Progress += 10;
+                            }
+                        });
+                    }
+                };
+                process.ErrorDataReceived += (_, e) =>
+                {
+                    if (!string.IsNullOrWhiteSpace(e.Data))
+                    {
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            state.ProgressDetail = e.Data.Trim();
+                        });
+                    }
+                };
+
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                using (cancellationToken.Register(() =>
+                {
+                    try { process.Kill(true); } catch { }
+                }))
+                {
+                    await process.WaitForExitAsync(cancellationToken);
+                }
+
+                if (process.ExitCode != 0)
+                    throw new InvalidOperationException($"Homebrew install failed with exit code {process.ExitCode}.");
+
+                state.Progress = 100;
+                state.ProgressDetail = "";
+            }
+            else if (OperatingSystem.IsWindows())
+            {
+                state.Status = EnginePackageStatus.Downloading;
+                state.Progress = 10;
+                state.ProgressDetail = "Installing Tesseract with winget...";
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "winget",
+                    ArgumentList = { "install", "UB-Mannheim.TesseractOCR", "--accept-source-agreements", "--accept-package-agreements" },
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = new Process { StartInfo = psi };
+                process.OutputDataReceived += (_, e) =>
+                {
+                    if (!string.IsNullOrWhiteSpace(e.Data))
+                    {
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            state.ProgressDetail = e.Data.Trim();
+                        });
+                    }
+                };
+
+                process.Start();
+                process.BeginOutputReadLine();
+
+                using (cancellationToken.Register(() =>
+                {
+                    try { process.Kill(true); } catch { }
+                }))
+                {
+                    await process.WaitForExitAsync(cancellationToken);
+                }
+
+                if (process.ExitCode != 0)
+                    throw new InvalidOperationException($"winget install failed with exit code {process.ExitCode}.");
+            }
+            else
+            {
+                throw new PlatformNotSupportedException("Automatic installation is not supported on this platform. Please install tesseract using your package manager.");
+            }
         }
         finally
         {
@@ -346,8 +517,45 @@ public sealed class EngineDownloadService
             return false;
         try
         {
+            if (state.Package.Id == "tesseract")
+            {
+                if (OperatingSystem.IsMacOS())
+                {
+                    var brew = EnginePackageState.LocateBrew();
+                    if (brew is not null)
+                    {
+                        var psi = new ProcessStartInfo
+                        {
+                            FileName = brew,
+                            ArgumentList = { "uninstall", "tesseract", "tesseract-lang" },
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        };
+                        var brewDir = Path.GetDirectoryName(brew);
+                        var currentPath = Environment.GetEnvironmentVariable("PATH") ?? "";
+                        if (brewDir is not null && !currentPath.Contains(brewDir))
+                            psi.Environment["PATH"] = brewDir + ":" + currentPath;
+                        psi.Environment["HOMEBREW_NO_AUTO_UPDATE"] = "1";
+                        psi.Environment["HOMEBREW_NO_ENV_HINTS"] = "1";
+                        using var process = Process.Start(psi);
+                        process?.WaitForExit();
+                    }
+                }
+                else if (OperatingSystem.IsWindows())
+                {
+                    using var process = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "winget",
+                        ArgumentList = { "uninstall", "UB-Mannheim.TesseractOCR" },
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    });
+                    process?.WaitForExit();
+                }
+                EngineEnvironment.ForgetSystemCopies();
+            }
             _installer.Uninstall(state.Package);
-            state.Status = EnginePackageStatus.NotInstalled;
+            state.Status = StatusOf(state);
             _catalog.Refresh();
             return true;
         }

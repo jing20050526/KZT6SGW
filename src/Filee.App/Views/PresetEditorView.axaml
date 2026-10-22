@@ -296,6 +296,38 @@
       </StackPanel>
     </Border>
 
+    <!-- Documents: Optical Character Recognition (OCR) for scanned pages and images -->
+    <Border x:Name="OcrCard" Classes="card" Padding="14" IsVisible="{Binding ShowOcr}">
+      <StackPanel Spacing="10">
+        <TextBlock Classes="h2" Text="{DynamicResource presets.group.ocr}" />
+        <StackPanel Spacing="2">
+          <CheckBox Content="{DynamicResource presets.ocr_enabled}" IsChecked="{Binding Ocr}" IsEnabled="{Binding !OcrDisabledOnLinux}" />
+          <TextBlock Classes="caption" TextWrapping="Wrap" Margin="28,0,0,0" Text="{DynamicResource presets.ocr_hint}" />
+        </StackPanel>
+        <Border Classes="badge" Margin="28,2,0,0" IsVisible="{Binding OcrDisabledOnLinux}" HorizontalAlignment="Left">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <PathIcon Width="12" Height="12" Data="{StaticResource Icon.Alert}" Foreground="{DynamicResource WarningBrush}" />
+            <TextBlock Classes="caption" Foreground="{DynamicResource WarningBrush}" Text="{DynamicResource presets.ocr_disabled_linux}" />
+          </StackPanel>
+        </Border>
+        <Border Classes="badge" Margin="28,2,0,0" IsVisible="{Binding ShowOcrMissingWarning}" HorizontalAlignment="Left">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <PathIcon Width="12" Height="12" Data="{StaticResource Icon.Alert}" Foreground="{DynamicResource WarningBrush}" />
+            <TextBlock Classes="caption" Foreground="{DynamicResource WarningBrush}" Text="{DynamicResource presets.ocr_engine_required}" />
+          </StackPanel>
+        </Border>
+        <StackPanel Spacing="2" Margin="28,4,0,0" IsVisible="{Binding ShowOcrLanguage}">
+          <Grid ColumnDefinitions="*,12,*">
+            <StackPanel>
+              <TextBlock Classes="label" Text="{DynamicResource presets.ocr_language}" />
+              <ComboBox ItemsSource="{Binding OcrLanguages}" SelectedItem="{Binding SelectedOcrLanguage}" HorizontalAlignment="Stretch" />
+            </StackPanel>
+          </Grid>
+          <TextBlock Classes="caption" TextWrapping="Wrap" Margin="0,4,0,0" Text="{DynamicResource presets.ocr_language_hint}" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
     <!-- PDF options (render settings also apply when a PDF is converted to images) -->
     <Border Classes="card" Padding="14" IsVisible="{Binding ShowPdf}">
       <StackPanel Spacing="10">

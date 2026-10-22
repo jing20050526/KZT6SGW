@@ -111,4 +111,17 @@ public class EnginesPageTests
             vm.Dispose();
         }
     }
+
+    [AvaloniaFact]
+    public void Tesseract_package_has_install_available_when_not_installed()
+    {
+        TestServices.EnsureInitialized("en");
+        var downloads = AppHost.Get<EngineDownloadService>();
+        var tesseract = downloads.Packages.FirstOrDefault(p => p.Package.Id == "tesseract");
+        Assert.NotNull(tesseract);
+        if (EnginePackageState.CanSystemInstall(tesseract.Package))
+        {
+            Assert.True(tesseract.CanInstall || tesseract.IsInstalled);
+        }
+    }
 }

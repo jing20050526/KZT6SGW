@@ -17,6 +17,7 @@
 
 using System.Text;
 using System.Text.RegularExpressions;
+using Filee.Core.Ocr;
 using Filee.Engines.Hwp.Hwpx;
 using Filee.Engines.Infrastructure;
 using PDFtoImage;
@@ -102,23 +103,37 @@ internal sealed partial class PdfDocumentReader
     private readonly string _path;
     private readonly string _mediaFolder;
     private readonly bool _textOnly;
+    private readonly IOcrEngine? _ocrEngine;
+    private readonly string? _ocrLanguage;
+    private readonly bool _enableOcr;
     private byte[]? _pdfBytes;
     private int _pictures;
 
-    private PdfDocumentReader(string path, string mediaFolder, bool textOnly)
+    private PdfDocumentReader(string path, string mediaFolder, bool textOnly, IOcrEngine? ocrEngine = null, string? ocrLanguage = null, bool enableOcr = true)
     {
         _path = path;
         _mediaFolder = mediaFolder;
         _textOnly = textOnly;
+        _ocrEngine = ocrEngine;
+        _ocrLanguage = ocrLanguage;
+        _enableOcr = enableOcr;
     }
 
     /// <summary>Reads <paramref name="path"/> with pictures (extracted into <paramref name="mediaFolder"/>) and scans.</summary>
-    public static HDocument Read(string path, string mediaFolder) => new PdfDocumentReader(path, mediaFolder, textOnly: false).ReadDocument();
+    public static HDocument Read(string path, string mediaFolder) =>
+        new PdfDocumentReader(path, mediaFolder, textOnly: false).ReadDocument();
+
+    public static HDocument Read(string path, string mediaFolder, IOcrEngine? ocrEngine, string? ocrLanguage = null, bool enableOcr = true) =>
+        new PdfDocumentReader(path, mediaFolder, textOnly: false, ocrEngine, ocrLanguage, enableOcr).ReadDocument();
 
     /// <summary>
     /// Reads only the text, including invisible text (the OCR layer of scanned PDFs); pictures and scans are left out.
     /// </summary>
-    public static HDocument ReadText(string path) => new PdfDocumentReader(path, "", textOnly: true).ReadDocument();
+    public static HDocument ReadText(string path) =>
+        new PdfDocumentReader(path, "", textOnly: true).ReadDocument();
+
+    public static HDocument ReadText(string path, IOcrEngine? ocrEngine, string? ocrLanguage = null, bool enableOcr = true) =>
+        new PdfDocumentReader(path, "", textOnly: true, ocrEngine, ocrLanguage, enableOcr).ReadDocument();
 
     // ───────────────────────── Model of a page ─────────────────────────
 
@@ -237,7 +252,7 @@ internal sealed partial class PdfDocumentReader
         new("The PDF is password-protected. Open it with its password and save a copy without one, then convert that copy.");
 
     /// <summary>
-    /// The text of each page in <paramref name="pages"/> (zero-based), read like <see cref="ReadText"/> (reading order,
+    /// The text of each page in <paramref name="pages"/> (zero-based), read like <see cref="ReadText(string)"/> (reading order,
     /// invisible OCR text included) but page by page, with running heads and page numbers kept: "" for a page without
     /// text. Paragraphs are separated by an empty line, lines end with CR LF.
     /// </summary>
@@ -308,13 +323,83 @@ internal sealed partial class PdfDocumentReader
                 lead.StartBaseLine.Y - crop.Bottom, Math.Max(1, size), Format(lead, size), link));
         }
 
+        if (words.Count == 0)
+        {
+            // First check if the page already had an invisible OCR layer that was skipped for formatting
+            foreach (var word in pageWords)
+            {
+                if (string.IsNullOrWhiteSpace(word.Text))
+                    continue;
+                var letters = word.Letters.Where(l => !string.IsNullOrWhiteSpace(l.Value)).ToList();
+                if (letters.Count == 0)
+                    continue;
+                var lead = string.IsNullOrWhiteSpace(word.Lead.Value) ? letters[0] : word.Lead;
+                var box = Shift(word.Box, crop);
+                var size = Median(letters.Select(LetterSize));
+                var center = new PdfPoint((box.Left + box.Right) / 2, (box.Top + box.Bottom) / 2);
+                var link = links.FirstOrDefault(l => Inside(l.Bounds, center)).Uri;
+                words.Add(new TextWord(CleanText(word.Text), box.Left, box.Right, box.Top, box.Bottom,
+                    lead.StartBaseLine.Y - crop.Bottom, Math.Max(1, size), Format(lead, size), link));
+            }
+        }
+
         if (words.Count == 0 || (rotated && !_textOnly))
         {
-            // A scan, a page of drawings, or a turned page: the rendered page keeps everything.
-            content.Scanned = true;
-            if (!_textOnly)
-                content.ScanPath = RenderScan(page.Number - 1);
-            return content;
+            if (_enableOcr)
+            {
+                var ocr = _ocrEngine ?? OcrEngineRegistry.GetDefault(_ocrLanguage);
+                if (ocr is not null && ocr.IsAvailable)
+                {
+                    var scanPath = RenderScan(page.Number - 1);
+                    try
+                    {
+                        var ocrResult = ocr.RecognizeAsync(scanPath, OcrEngineRegistry.ResolveLanguage(ocr, _ocrLanguage)).GetAwaiter().GetResult();
+                        if (ocrResult.Words.Count > 0)
+                        {
+                            var scaleX = content.Width / (double)ocrResult.ImageWidth;
+                            var scaleY = content.Height / (double)ocrResult.ImageHeight;
+                            // One baseline/top/bottom per OCR-detected line, not per word: on a skewed or photographed
+                            // scan each word's own pixel box drifts slightly in Y, which (once scaled to PDF points)
+                            // is enough for Lines() below to split a single real text line into several interleaved
+                            // reconstructed lines. Tesseract already groups words into lines; use that box.
+                            foreach (var line in ocrResult.Lines)
+                            {
+                                var pdfTop = content.Height - (line.Box.Top * scaleY);
+                                var pdfBottom = content.Height - (line.Box.Bottom * scaleY);
+                                var size = Math.Max(4, pdfTop - pdfBottom);
+                                var format = new HCharFormat(Size: (int)Math.Round(size * 100));
+                                foreach (var w in line.Words)
+                                {
+                                    var pdfLeft = w.Box.Left * scaleX;
+                                    var pdfRight = w.Box.Right * scaleX;
+                                    words.Add(new TextWord(CleanText(w.Text), pdfLeft, pdfRight, pdfTop, pdfBottom, pdfBottom, size, format, null));
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Fall back to pure scan if OCR encounters an error
+                    }
+
+                    if (words.Count == 0)
+                    {
+                        content.Scanned = true;
+                        if (!_textOnly)
+                            content.ScanPath = scanPath;
+                        return content;
+                    }
+                }
+            }
+
+            if (words.Count == 0)
+            {
+                // A scan, a page of drawings, or a turned page: the rendered page keeps everything.
+                content.Scanned = true;
+                if (!_textOnly)
+                    content.ScanPath = RenderScan(page.Number - 1);
+                return content;
+            }
         }
 
         // Plain text (TXT, page texts for slides) keeps table cells as paragraphs in reading order.
@@ -484,8 +569,9 @@ internal sealed partial class PdfDocumentReader
 
     private string NewMediaPath(string extension)
     {
-        Directory.CreateDirectory(_mediaFolder);
-        return Path.Combine(_mediaFolder, $"pdf-{++_pictures}.{extension}");
+        var folder = string.IsNullOrEmpty(_mediaFolder) ? Path.Combine(Path.GetTempPath(), "filee-media") : _mediaFolder;
+        Directory.CreateDirectory(folder);
+        return Path.Combine(folder, $"pdf-{++_pictures}.{extension}");
     }
 
     private SKBitmap Render(int pageIndex)
@@ -966,7 +1052,7 @@ internal sealed partial class PdfDocumentReader
 
     private static string? NullIfBlank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 
-    /// <summary>Plain text of a document read by <see cref="ReadText"/>: paragraphs separated by an empty line.</summary>
+    /// <summary>Plain text of a document read by <see cref="ReadText(string)"/>: paragraphs separated by an empty line.</summary>
     public static string PlainText(HDocument document)
     {
         var sb = new StringBuilder();

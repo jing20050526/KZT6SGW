@@ -1,6 +1,7 @@
 // THE place where conversion engines are registered. Adding an engine = one line in CreateAll.
 
 using Filee.Core.Conversion;
+using Filee.Core.Ocr;
 using Filee.Engines.Archives;
 using Filee.Engines.Cad;
 using Filee.Engines.Data;
@@ -15,6 +16,7 @@ using Filee.Engines.Infrastructure;
 using Filee.Engines.Magick;
 using Filee.Engines.Media;
 using Filee.Engines.Models3D;
+using Filee.Engines.Ocr;
 using Filee.Engines.Office;
 using Filee.Engines.Pdf;
 using Filee.Engines.Subtitles;
@@ -37,38 +39,44 @@ public static class EngineRegistry
     /// The app's log; FFmpeg writes which hardware encoders work and when one failed, LibreOffice when a file needed
     /// its container repacked.
     /// </param>
-    public static IReadOnlyList<IConverter> CreateAll(EngineEnvironment env, ILoggerFactory? loggers = null) =>
-    [
-        new MagickImageConverter(),
-        new PdfSharpConverter(),
-        new PdfiumConverter(),
-        new RhwpConverter(),
-        new UnhwpConverter(),
-        new MarkdownConverter(),
-        new SpreadsheetConverter(),
-        new OoxmlConverter(),
-        new HwpxConverter(),
-        new ArchiveConverter(),
-        new VectorConverter(),
-        new IcnsConverter(),
-        new FontConverter(),
-        new DocxWriterConverter(),
-        new PdfTextConverter(),
-        new PdfSlidesConverter(),
-        new EmlConverter(),
-        new DataConverter(),
-        new SubtitleConverter(),
-        new WicImageConverter(),
-        new FfmpegConverter(loggers?.CreateLogger<FfmpegConverter>()),
-        new CadConverter(),
-        new ModelConverter(),
-        new GeoConverter(),
-        new EbookConverter(),
-        new PandocConverter(),
-        new GhostscriptConverter(),
-        new CalibreConverter(),
-        new LibreOfficeConverter(env, loggers?.CreateLogger<LibreOfficeConverter>()),
-    ];
+    public static IReadOnlyList<IConverter> CreateAll(EngineEnvironment env, ILoggerFactory? loggers = null)
+    {
+        OcrEngineRegistry.Register(new TesseractOcrEngine());
+
+        return
+        [
+            new MagickImageConverter(),
+            new PdfSharpConverter(),
+            new PdfiumConverter(),
+            new RhwpConverter(),
+            new UnhwpConverter(),
+            new MarkdownConverter(),
+            new SpreadsheetConverter(),
+            new OoxmlConverter(),
+            new HwpxConverter(),
+            new ArchiveConverter(),
+            new VectorConverter(),
+            new IcnsConverter(),
+            new FontConverter(),
+            new DocxWriterConverter(),
+            new ImageOcrConverter(),
+            new PdfTextConverter(),
+            new PdfSlidesConverter(),
+            new EmlConverter(),
+            new DataConverter(),
+            new SubtitleConverter(),
+            new WicImageConverter(),
+            new FfmpegConverter(loggers?.CreateLogger<FfmpegConverter>()),
+            new CadConverter(),
+            new ModelConverter(),
+            new GeoConverter(),
+            new EbookConverter(),
+            new PandocConverter(),
+            new GhostscriptConverter(),
+            new CalibreConverter(),
+            new LibreOfficeConverter(env, loggers?.CreateLogger<LibreOfficeConverter>()),
+        ];
+    }
 
     /// <summary>Finds the PDF merger among the converters.</summary>
     public static IPdfMerger? FindPdfMerger(IEnumerable<IConverter> converters) =>

@@ -6,6 +6,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Filee.Core.Formats;
 using Filee.Core.Localization;
+using Filee.Core.Ocr;
 using Filee.Core.Presets;
 
 namespace Filee.App.ViewModels;
@@ -97,6 +98,94 @@ public sealed partial class PresetEditorViewModel : ObservableObject
         AnimationSpeeds = [.. ImageOptions.AnimationSpeeds.Append(_edit.Image.PlaybackSpeed).Distinct().Order()
             .Select(s => new Choice<double>(s, s == 1 ? loc["presets.animation_speed.original"] : SpeedLabel(s)))];
 
+        OcrLanguages =
+        [
+            new Choice<string?>(null, loc["presets.ocr_language.auto"]),
+            // Popular / Primary Languages
+            new Choice<string?>("en", "English"),
+            new Choice<string?>("ne", "Nepali / नेपाली"),
+            new Choice<string?>("hi", "Hindi / हिन्दी"),
+            new Choice<string?>("zh-Hans", "Chinese Simplified / 简体中文"),
+            new Choice<string?>("zh-Hant", "Chinese Traditional / 繁體中文"),
+            new Choice<string?>("ja", "Japanese / 日本語"),
+            new Choice<string?>("ko", "Korean / 한국어"),
+            new Choice<string?>("es", "Spanish / Español"),
+            new Choice<string?>("fr", "French / Français"),
+            new Choice<string?>("de", "German / Deutsch"),
+            new Choice<string?>("it", "Italian / Italiano"),
+            new Choice<string?>("pt", "Portuguese / Português"),
+            new Choice<string?>("ru", "Russian / Русский"),
+            new Choice<string?>("ar", "Arabic / العربية"),
+            new Choice<string?>("th", "Thai / ไทย"),
+            new Choice<string?>("el", "Greek / Ελληνικά"),
+            new Choice<string?>("uk", "Ukrainian / Українська"),
+            new Choice<string?>("tr", "Turkish / Türkçe"),
+            new Choice<string?>("vi", "Vietnamese / Tiếng Việt"),
+            new Choice<string?>("id", "Indonesian / Bahasa Indonesia"),
+            new Choice<string?>("pl", "Polish / Polski"),
+            new Choice<string?>("nl", "Dutch / Nederlands"),
+            new Choice<string?>("sv", "Swedish / Svenska"),
+            new Choice<string?>("da", "Danish / Dansk"),
+            new Choice<string?>("fi", "Finnish / Suomi"),
+            new Choice<string?>("no", "Norwegian / Norsk"),
+            new Choice<string?>("cs", "Czech / Čeština"),
+            new Choice<string?>("sk", "Slovak / Slovenčina"),
+            new Choice<string?>("hu", "Hungarian / Magyar"),
+            new Choice<string?>("ro", "Romanian / Română"),
+            new Choice<string?>("bg", "Bulgarian / Български"),
+            new Choice<string?>("hr", "Croatian / Hrvatski"),
+            new Choice<string?>("sr-Cyrl", "Serbian (Cyrillic) / Српски"),
+            new Choice<string?>("sr-Latn", "Serbian (Latin) / Srpski"),
+            new Choice<string?>("sl", "Slovenian / Slovenščina"),
+            new Choice<string?>("et", "Estonian / Eesti"),
+            new Choice<string?>("lv", "Latvian / Latviešu"),
+            new Choice<string?>("lt", "Lithuanian / Lietuvių"),
+            new Choice<string?>("be", "Belarusian / Беларуская"),
+            // South Asian / Indic Languages
+            new Choice<string?>("sa", "Sanskrit / संस्कृतम्"),
+            new Choice<string?>("mr", "Marathi / मराठी"),
+            new Choice<string?>("ta", "Tamil / தமிழ்"),
+            new Choice<string?>("te", "Telugu / తెలుగు"),
+            new Choice<string?>("ur", "Urdu / اردو"),
+            new Choice<string?>("fa", "Persian / فارسی"),
+            new Choice<string?>("ps", "Pashto / پښتو"),
+            new Choice<string?>("sd", "Sindhi / سنڌي"),
+            new Choice<string?>("ug", "Uyghur / ئۇيغۇرچە"),
+            // European, Regional & World Languages
+            new Choice<string?>("af", "Afrikaans"),
+            new Choice<string?>("az", "Azerbaijani / Azərbaycan"),
+            new Choice<string?>("bs", "Bosnian / Bosanski"),
+            new Choice<string?>("ca", "Catalan / Català"),
+            new Choice<string?>("cy", "Welsh / Cymraeg"),
+            new Choice<string?>("eu", "Basque / Euskara"),
+            new Choice<string?>("ga", "Irish / Gaeilge"),
+            new Choice<string?>("gl", "Galician / Galego"),
+            new Choice<string?>("is", "Icelandic / Íslenska"),
+            new Choice<string?>("ka", "Georgian / ქართული"),
+            new Choice<string?>("ku", "Kurdish / Kurdî"),
+            new Choice<string?>("la", "Latin / Latina"),
+            new Choice<string?>("lb", "Luxembourgish / Lëtzebuergesch"),
+            new Choice<string?>("mi", "Maori / Te Reo Māori"),
+            new Choice<string?>("mk", "Macedonian / Македонски"),
+            new Choice<string?>("mn", "Mongolian / Монгол"),
+            new Choice<string?>("ms", "Malay / Bahasa Melayu"),
+            new Choice<string?>("mt", "Maltese / Malti"),
+            new Choice<string?>("oc", "Occitan / Lenga d'òc"),
+            new Choice<string?>("qu", "Quechua / Runasimi"),
+            new Choice<string?>("sq", "Albanian / Shqip"),
+            new Choice<string?>("sw", "Swahili / Kiswahili"),
+            new Choice<string?>("tl", "Tagalog / Filipino"),
+            new Choice<string?>("uz", "Uzbek / Oʻzbekcha"),
+            new Choice<string?>("kk", "Kazakh / Қазақша"),
+            new Choice<string?>("ky", "Kyrgyz / Кыргызча"),
+            new Choice<string?>("tg", "Tajik / Тоҷикӣ"),
+            new Choice<string?>("tt", "Tatar / Татарча"),
+        ];
+        // Vision and Tesseract each claim a real, limited set of languages (SupportedLanguages); the old PaddleOCR
+        // engine claimed over 100 it could never actually recognize (no bundled model, no install path). Only offer
+        // what a registered engine can really attempt, so picking a language never leads straight to "engine missing".
+        OcrLanguages = [.. OcrLanguages.Where(c => c.Value is null || OcrEngineRegistry.AnyEngineSupports(c.Value))];
+
         _name = string.IsNullOrWhiteSpace(_edit.Name) ? loc.DisplayName(_edit) : _edit.Name;
         _target = Targets.FirstOrDefault(t => t.Value == _edit.TargetFormat) ?? Targets[1];
         _resize = ResizeModes.First(r => r.Value == _edit.Image.Resize);
@@ -163,6 +252,13 @@ public sealed partial class PresetEditorViewModel : ObservableObject
         _pattern = _edit.Output.FileNamePattern;
         _keepDates = _edit.Output.KeepDates;
         _zipResult = _edit.Output.ZipResult;
+        _ocr = _edit.Document.Ocr;
+        _selectedOcrLanguage = OcrLanguages.FirstOrDefault(l =>
+            l.Value == _edit.Document.OcrLanguage ||
+            (l.Value is not null && _edit.Document.OcrLanguage is not null &&
+             (_edit.Document.OcrLanguage.StartsWith(l.Value, StringComparison.OrdinalIgnoreCase) ||
+              l.Value.StartsWith(_edit.Document.OcrLanguage, StringComparison.OrdinalIgnoreCase))))
+            ?? OcrLanguages[0];
     }
 
     public string PresetId => _original.Id;
@@ -193,6 +289,7 @@ public sealed partial class PresetEditorViewModel : ObservableObject
 
     /// <summary>Playback speeds of animations, 0.25× to 4× (ImageOptions.AnimationSpeed).</summary>
     public IReadOnlyList<Choice<double>> AnimationSpeeds { get; }
+    public IReadOnlyList<Choice<string?>> OcrLanguages { get; }
 
     [ObservableProperty, NotifyPropertyChangedFor(nameof(NameError), nameof(IsValid))]
     private string _name;
@@ -206,7 +303,8 @@ public sealed partial class PresetEditorViewModel : ObservableObject
         nameof(AudioCodecs), nameof(AudioCodecChoice), nameof(ShowAudioCodec),
         nameof(ShowArchive), nameof(ShowArchiveOptions), nameof(ShowExtractNote),
         nameof(ShowSaveEveryFrame), nameof(ShowAnimationSpeed), nameof(ShowTrace), nameof(ShowExtractMotionPhoto),
-        nameof(ShowLivePhotoChoice), nameof(LivePhotoKinds), nameof(LivePhotoChoice), nameof(IsLivePhoto), nameof(LivePhotoHint))]
+        nameof(ShowLivePhotoChoice), nameof(LivePhotoKinds), nameof(LivePhotoChoice), nameof(IsLivePhoto), nameof(LivePhotoHint),
+        nameof(ShowOcr), nameof(ShowOcrLanguage), nameof(ShowOcrMissingWarning), nameof(OcrDisabledOnLinux))]
     private Choice<string> _target;
 
     private LivePhotoKind _livePhotoValue;
@@ -393,6 +491,8 @@ public sealed partial class PresetEditorViewModel : ObservableObject
 
     /// <summary>Markdown: the text only, no picture folder next to it (DocumentOptions.LeaveOutPictures).</summary>
     [ObservableProperty] private bool _leaveOutPictures;
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(ShowOcrLanguage)), NotifyPropertyChangedFor(nameof(ShowOcrMissingWarning))] private bool _ocr;
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(HasOcrEngine)), NotifyPropertyChangedFor(nameof(ShowOcrMissingWarning))] private Choice<string?> _selectedOcrLanguage;
     [ObservableProperty] private string _subfolderName;
     /// <summary>The subfolder only for a file that becomes several (OutputRule.SubfolderOnlyForSeveralFiles).</summary>
     [ObservableProperty] private bool _subfolderOnlyForSeveralFiles;
@@ -497,6 +597,17 @@ public sealed partial class PresetEditorViewModel : ObservableObject
     public bool ShowDocument => TargetId == "pdf";
     /// <summary>Markdown can't hold pictures: they go into a folder next to it, or are left out.</summary>
     public bool ShowLeaveOutPictures => TargetId == "md";
+
+    /// <summary>OCR (Optical Character Recognition) for text recognition in scanned documents / images.</summary>
+    public bool ShowOcr => !IsTool && (TargetCategory is FormatCategory.Document or FormatCategory.Text or FormatCategory.Ebook
+        || TargetId is "docx" or "txt" or "md" or "hwpx" or "pdf" or "rtf" or "odt");
+    public bool ShowOcrLanguage => ShowOcr && Ocr;
+    public bool HasOcrEngine => OcrEngineRegistry.GetDefault(SelectedOcrLanguage?.Value) is not null;
+    public bool HasAnyOcrEngine => OcrEngineRegistry.All.Any(e => e.IsAvailable);
+    /// <summary>Linux has no built-in OCR (unlike Apple Vision on macOS), so Tesseract isn't just optional there: with
+    /// nothing installed, OCR can't run at all, and the toggle is disabled rather than left on to fail at conversion time.</summary>
+    public bool OcrDisabledOnLinux => ShowOcr && OperatingSystem.IsLinux() && !HasAnyOcrEngine;
+    public bool ShowOcrMissingWarning => ShowOcr && !OcrDisabledOnLinux && (!HasAnyOcrEngine || (Ocr && !HasOcrEngine));
     public bool ShowMedia => ShowMediaQuality || ShowMaxHeight || ShowRemoveAudio || ShowAudioChannels || ShowVideoCodec || ShowAudioCodec;
     /// <summary>Mono / stereo for every audio target but AMR, which is mono by definition.</summary>
     public bool ShowAudioChannels => TargetIsAudio && TargetId != "amr";
@@ -598,6 +709,8 @@ public sealed partial class PresetEditorViewModel : ObservableObject
         _original.Document.PdfA = PdfA;
         // Only where the option is shown, as with SaveEveryFrame below.
         _original.Document.LeaveOutPictures = ShowLeaveOutPictures && LeaveOutPictures;
+        _original.Document.Ocr = ShowOcr && Ocr;
+        _original.Document.OcrLanguage = ShowOcr && Ocr ? SelectedOcrLanguage.Value : null;
 
         var media = _original.Media;
         media.Quality = MediaQuality.Value;

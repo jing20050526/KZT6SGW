@@ -34,6 +34,8 @@ internal sealed class CliHost : IAsyncDisposable
         EngineEnvironment.LibreOfficeForDocuments = store.Settings.LibreOfficeForDocuments;
         EngineEnvironment.LibreOfficeForSheets = store.Settings.LibreOfficeForSheets;
         var converters = EngineRegistry.CreateAll(new EngineEnvironment(store.Directory));
+        if (OperatingSystem.IsMacOS())
+            Filee.Core.Ocr.OcrEngineRegistry.Register(new Filee.Platform.MacOS.MacOsVisionOcrEngine());
         var catalog = new ConverterCatalog(converters) { Priority = store.Settings.EnginePriority };
         var queue = new JobQueue(catalog, EngineRegistry.FindPdfMerger(converters), combiner: EngineRegistry.FindFileCombiner(converters),
             tiffMerger: EngineRegistry.FindTiffMerger(converters));

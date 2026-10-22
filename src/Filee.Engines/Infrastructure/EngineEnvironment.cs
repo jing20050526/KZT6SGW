@@ -84,6 +84,7 @@ public sealed class EngineEnvironment(string dataDirectory)
         ["calibre"] = [windows ? "ebook-convert.exe" : "ebook-convert"],
         ["rhwp"] = [windows ? "rhwp.exe" : "rhwp"],
         ["7zip"] = [windows ? "7z.exe" : "7zz"],
+        ["tesseract"] = [windows ? "tesseract.exe" : "tesseract"],
     };
 
     public static string ProgramName(string name) => OperatingSystem.IsWindows() ? name
@@ -217,6 +218,8 @@ public sealed class EngineEnvironment(string dataDirectory)
             }
             if (id == "calibre")
                 folders.AddRange(["/Applications/calibre.app", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Applications", "calibre.app"), "/opt/calibre"]);
+            if (id == "tesseract")
+                folders.AddRange(["/opt/homebrew/opt/tesseract/bin", "/usr/local/opt/tesseract/bin"]);
         }
         foreach (var root in (OperatingSystem.IsWindows()
                      ? new[] { Environment.SpecialFolder.ProgramFiles, Environment.SpecialFolder.ProgramFilesX86 }
@@ -230,6 +233,10 @@ public sealed class EngineEnvironment(string dataDirectory)
                     break;
                 case "calibre":
                     folders.Add(Path.Combine(root, "Calibre2"));
+                    break;
+                case "tesseract":
+                    // The official UB-Mannheim installer's default location.
+                    folders.Add(Path.Combine(root, "Tesseract-OCR"));
                     break;
                 case "ghostscript":
                     // C:\Program Files\gs\gs10.04.0\bin, newest first
