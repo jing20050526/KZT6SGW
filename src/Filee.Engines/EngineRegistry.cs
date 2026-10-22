@@ -15,6 +15,7 @@ using Filee.Engines.Infrastructure;
 using Filee.Engines.Magick;
 using Filee.Engines.Media;
 using Filee.Engines.Models3D;
+using Filee.Engines.Ocr;
 using Filee.Engines.Office;
 using Filee.Engines.Pdf;
 using Filee.Engines.Subtitles;
@@ -66,6 +67,7 @@ public static class EngineRegistry
         new EbookConverter(),
         new PandocConverter(),
         new GhostscriptConverter(),
+        new TesseractConverter(),
         new CalibreConverter(),
         new LibreOfficeConverter(env, loggers?.CreateLogger<LibreOfficeConverter>()),
     ];

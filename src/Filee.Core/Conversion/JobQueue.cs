@@ -236,8 +236,9 @@ public sealed class JobQueue : IAsyncDisposable
                 var file = job.Files[i];
                 if (Stopped(file))
                     return;
-                // An empty PDF goes the long way, where it fails as empty instead of breaking the whole merge.
-                if (FormatRegistry.Detect(file.SourcePath)?.Id == "pdf" && !IsEmptyFile(file.SourcePath))
+                // An empty PDF goes the long way, where it fails as empty instead of breaking the whole merge; so does
+                // one whose text is recognized first.
+                if (FormatRegistry.Detect(file.SourcePath)?.Id == "pdf" && !IsEmptyFile(file.SourcePath) && !job.Preset.RecognizesTextOf("pdf"))
                 {
                     // Already a PDF, merged as it is: its pages can't be turned (only images going into it can).
                     if (job.Preset.Image.TurnsOrMirrors)
@@ -507,7 +508,10 @@ public sealed class JobQueue : IAsyncDisposable
         var frames = finalOutput && job.Preset.SavesFramesOf(source.Id);
         var motionPhoto = finalOutput && job.Preset.ExtractsMotionOf(source.Id);
         var livePhoto = finalOutput && job.Preset.MakesLivePhotoOf(source.Id);
-        var route = planner.Plan(source.Id, target, frames, motionPhoto: motionPhoto, livePhoto: livePhoto);
+        // "Recognize text": Tesseract writes a searchable PDF first, read on into DOCX, TXT, … from there. Also for the
+        // PDFs that are merged into one.
+        var ocr = (finalOutput || target == "pdf") && job.Preset.RecognizesTextOf(source.Id);
+        var route = planner.Plan(source.Id, target, frames, motionPhoto: motionPhoto, livePhoto: livePhoto, ocr: ocr);
         if (route is null)
             return Fail(file, "error.no_route", $"{source.Id} → {target}");
 
@@ -518,7 +522,7 @@ public sealed class JobQueue : IAsyncDisposable
         {
             _log.LogInformation("{File} has {Script} text, which {Engine} can't draw: planning a route without it",
                 file.SourcePath, script, route.Steps.First(s => s.Unshaped).Converter.DisplayName);
-            route = planner.Plan(source.Id, target, frames, shaping: true);
+            route = planner.Plan(source.Id, target, frames, shaping: true, ocr: ocr);
             if (route is null)
                 return Fail(file, "error.needs_shaping", script);
         }

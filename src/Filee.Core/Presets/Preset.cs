@@ -164,6 +164,15 @@ public sealed class Preset
         MediaOptions.LivePhotoTargets(Media.LivePhoto).Contains(TargetFormat)
         && Formats.FormatRegistry.FindById(sourceFormat)?.Category == Formats.FormatCategory.Video;
 
+    /// <summary>
+    /// True if converting a <paramref name="sourceFormat"/> file recognizes its text first (<see cref="PdfOptions.Ocr"/>):
+    /// the file is a PDF or a picture and the target one of <see cref="PdfOptions.OcrTargets"/>.
+    /// </summary>
+    public bool RecognizesTextOf(string sourceFormat) =>
+        Pdf.Ocr
+        && PdfOptions.OcrTargets.Contains(TargetFormat)
+        && (sourceFormat == "pdf" || Formats.FormatRegistry.FindById(sourceFormat)?.Category == Formats.FormatCategory.Image);
+
     /// <summary>True for a <see cref="PresetKind.Tool"/>.</summary>
     [JsonIgnore]
     public bool IsTool => Kind == PresetKind.Tool;
@@ -408,6 +417,19 @@ public sealed class PdfOptions
     /// result is smaller. Off by default: it rewrites the whole file (fonts, structure), not only the pictures.
     /// </summary>
     public bool CompressWithGhostscript { get; set; }
+
+    /// <summary>Formats text read from scans can go into (<see cref="Ocr"/>): those Filee writes from a PDF's text itself.</summary>
+    public static readonly IReadOnlyList<string> OcrTargets = ["pdf", "docx", "txt", "md", "hwpx"];
+
+    /// <summary>
+    /// Recognize the text of scanned pages and pictures with Tesseract (<see cref="Preset.RecognizesTextOf"/>): a PDF
+    /// gets a searchable text layer, a DOCX, TXT, Markdown or HWPX gets the text. Pages that already have text stay as
+    /// they are.
+    /// </summary>
+    public bool Ocr { get; set; }
+
+    /// <summary>With <see cref="Ocr"/>: the language of the text, as a Tesseract code (<c>eng</c>, <c>deu</c>, <c>chi_sim</c>).</summary>
+    public string OcrLanguage { get; set; } = "eng";
 
     public PdfOptions Clone() => (PdfOptions)MemberwiseClone();
 }

@@ -7,6 +7,7 @@
 //    entries, no admin rights. Parts headless LibreOffice never uses (help, gallery, most dictionaries) are removed.
 //  * conda-forge packages (Ghostscript, the Microsoft C++ runtime) are zip files holding zstd-compressed tarballs;
 //    only their Windows binaries (Library/bin) are unpacked, with a managed decompressor (no 7-Zip, no installer).
+//  * NSIS installers (Tesseract) are unpacked with Filee's own 7-Zip, never run: files only, no registry entries.
 //  * A marker file with the component's hash records what is installed, so an engines.json update is detected.
 
 using System.Diagnostics;
@@ -205,6 +206,20 @@ public sealed class EngineInstaller
                     UnpackConda(file, staging, cancellationToken);
                     Replace(component.Id, staging);
                     break;
+                case "traineddata":
+                    // One Tesseract language (OcrLanguages): the file as it is, in a folder of its own.
+                    Directory.CreateDirectory(staging);
+                    File.Copy(file, Path.Combine(staging, component.Id + ".traineddata"));
+                    Replace(component.Id, staging);
+                    break;
+                case "nsis":
+                    var sevenZip = Archives.SevenZip.Locate()
+                                   ?? throw new InvalidOperationException($"{component.Id} needs Filee's 7-Zip, which is missing.");
+                    Directory.CreateDirectory(staging);
+                    await sevenZip.ExtractAsync(file, staging, [], _root, cancellationToken);
+                    TrimTesseract(staging);
+                    Replace(component.Id, staging);
+                    break;
                 case "oxt":
                     // LibreOffice registers bundled extensions (plain folders under share/extensions) on start-up.
                     var extensions = Path.Combine(FolderOf("libreoffice"), "share", "extensions");
@@ -382,6 +397,26 @@ public sealed class EngineInstaller
     }
 
     /// <summary>
+    /// Removes what OCR never uses (~80 MB): the training programs and their manuals, the installer's own files and
+    /// the bundled language data (Filee downloads its own, see OcrLanguages). tesseract.exe, its DLLs and the
+    /// licenses in doc/ stay.
+    /// </summary>
+    internal static void TrimTesseract(string root)
+    {
+        foreach (var folder in new[] { "$PLUGINSDIR", "tessdata" })
+        {
+            var path = Path.Combine(root, folder);
+            if (Directory.Exists(path))
+                Directory.Delete(path, recursive: true);
+        }
+        foreach (var file in Directory.EnumerateFiles(root, "*.exe").Concat(Directory.EnumerateFiles(root, "*.html")).ToList())
+        {
+            if (!string.Equals(Path.GetFileName(file), "tesseract.exe", StringComparison.OrdinalIgnoreCase))
+                File.Delete(file);
+        }
+    }
+
+    /// <summary>
     /// Unpacks the Windows binaries of a conda package (.conda = zip with pkg-*.tar.zst): the files under Library/bin
     /// land directly in <paramref name="target"/>. Resources such as Ghostscript's fonts are compiled into its DLL.
     /// </summary>
@@ -443,7 +478,7 @@ public sealed class EngineInstaller
     /// <summary>Makes <paramref name="source"/> the engine folder, replacing a previous version.</summary>
     private void Replace(string id, string source)
     {
-        RequiredProgramFolder(id, source, _components[id].Kind is "msi" or "conda" || OperatingSystem.IsWindows());
+        RequiredProgramFolder(id, source, _components[id].Kind is "msi" or "conda" or "nsis" || OperatingSystem.IsWindows());
         var target = FolderOf(id);
         if (Directory.Exists(target))
             Directory.Delete(target, recursive: true);

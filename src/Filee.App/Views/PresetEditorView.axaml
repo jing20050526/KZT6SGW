@@ -317,6 +317,27 @@
             <CheckBox Content="{DynamicResource presets.pdf_keep_metadata}" IsChecked="{Binding KeepMetadata}" />
           </StackPanel>
         </StackPanel>
+        <!-- Scans and pictures → searchable PDF, DOCX, TXT, … with Tesseract -->
+        <StackPanel Spacing="2" IsVisible="{Binding ShowOcr}">
+          <CheckBox Content="{DynamicResource presets.ocr}" IsChecked="{Binding Ocr}" />
+          <TextBlock Classes="caption" TextWrapping="Wrap" Margin="28,0,0,0" Text="{DynamicResource presets.ocr_hint}" />
+          <Grid ColumnDefinitions="*,12,*" Margin="28,6,0,0" IsVisible="{Binding Ocr}">
+            <StackPanel>
+              <TextBlock Classes="label" Text="{DynamicResource presets.ocr_language}" />
+              <ComboBox ItemsSource="{Binding OcrLanguageChoices}" SelectedItem="{Binding OcrLanguage}" HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch" MaxDropDownHeight="420">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:IChoice">
+                    <DockPanel>
+                      <TextBlock DockPanel.Dock="Right" Classes="caption" Text="{Binding Detail}" Margin="12,0,0,0" VerticalAlignment="Center" />
+                      <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    </DockPanel>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+          </Grid>
+        </StackPanel>
         <StackPanel Spacing="2" IsVisible="{Binding ShowPdfCombine}">
           <CheckBox Content="{DynamicResource presets.combine_pages}" IsChecked="{Binding CombinePages}" />
           <TextBlock Classes="caption" TextWrapping="Wrap" Margin="28,0,0,0" Text="{DynamicResource presets.combine_pages_hint}" />

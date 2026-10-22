@@ -70,6 +70,13 @@
       "sha256": "0F96AE06165C2419607C1C66726C091A78E89E08EA69F077CF3E2C884E800853",
       "size": 226549760,
       "kind": "msi"
+    },
+    "tesseract": {
+      "version": "5.4.0.20240606",
+      "url": "https://github.com/UB-Mannheim/tesseract/releases/download/v5.4.0.20240606/tesseract-ocr-w64-setup-5.4.0.20240606.exe",
+      "sha256": "C885FFF6998E0608BA4BB8AB51436E1C6775C2BAFC2559A19B423E18678B60C9",
+      "size": 50175248,
+      "kind": "nsis"
     }
   },
   "platforms": {

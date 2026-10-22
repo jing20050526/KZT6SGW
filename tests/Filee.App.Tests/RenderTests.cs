@@ -1116,6 +1116,42 @@ public class RenderTests
         Assert.False(preset.Output.SubfolderOnlyForSeveralFiles);
     }
 
+    [AvaloniaTheory]
+    [InlineData("en")]
+    [InlineData("ko")]
+    public void Preset_editor_shows_and_saves_text_recognition(string language)
+    {
+        TestServices.EnsureInitialized(language);
+        var loc = AppHost.Get<Filee.Core.Localization.ILocalizer>();
+        var preset = Filee.Core.Presets.BuiltInData.CreatePresets().Single(p => p.Id == "searchable-pdf");
+        var vm = new PresetEditorViewModel(preset, loc);
+        Assert.True(vm.ShowOcr);
+        Assert.True(vm.Ocr);
+        Assert.Equal("eng", vm.OcrLanguage.Value);
+        Assert.Equal("eng", vm.OcrLanguageChoices[0].Value); // English first, the others by their own names
+
+        var window = new PresetEditorWindow { DataContext = vm, Height = 1400 };
+        window.Show();
+        Pump();
+        Save(window, $"preset-ocr-{language}.png");
+        window.Close();
+
+        // Scanned letters into Word, in German.
+        vm.Target = vm.Targets.Single(t => t.Value == "docx");
+        vm.OcrLanguage = vm.OcrLanguageChoices.Single(l => l.Value == "deu");
+        Assert.Equal("Deutsch", vm.OcrLanguage.Label);
+        Assert.True(vm.Apply());
+        Assert.True(preset.Pdf.Ocr);
+        Assert.Equal("deu", preset.Pdf.OcrLanguage);
+
+        // Not for pictures: the box is hidden there, and not kept on behind it.
+        vm = new PresetEditorViewModel(preset, loc);
+        vm.Target = vm.Targets.Single(t => t.Value == "png");
+        Assert.False(vm.ShowOcr);
+        Assert.True(vm.Apply());
+        Assert.False(preset.Pdf.Ocr);
+    }
+
     [AvaloniaFact]
     public void Preset_editor_keeps_rotation_visible_for_pdf_and_drops_it_for_targets_that_cannot_turn()
     {

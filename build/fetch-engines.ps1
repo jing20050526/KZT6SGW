@@ -18,6 +18,8 @@
       ffmpeg/        FFmpeg (GPL-3.0 build, separate program), video and audio; bin/ffmpeg.exe + bin/ffprobe.exe
       calibre/       calibre (GPL-3.0, separate program), extracted from the official MSI via an administrative
                      install: ebook-convert for LIT, LRF, PDB, ... and MOBI / AZW3 output
+      tesseract/     Tesseract OCR (Apache-2.0, separate program), UB Mannheim's Windows build unpacked from its
+                     installer with 7-Zip (never run); the language data is downloaded by the app when needed
 
   Every download is pinned to a version and verified with SHA-256 (src/Filee.Engines/Infrastructure/engines.json,
   shared with the app). Downloads are cached in build/.cache.
@@ -251,6 +253,20 @@ if ('ghostscript' -in $selected) {
     if (-not (Test-Path (Join-Path $target 'gswin64c.exe'))) { throw 'gswin64c.exe not found in the Ghostscript package.' }
     # App-local Microsoft C++ runtime next to gswin64c.exe, as EngineInstaller does.
     Copy-VcRuntime $target
+}
+
+if ('tesseract' -in $selected) {
+    # Trimmed like EngineInstaller.TrimTesseract: no training programs, manuals, installer files or language data.
+    $setup = Get-Engine 'tesseract'
+    $sevenZip = Join-Path $Destination '7zip\7z.exe'
+    if (-not (Test-Path $sevenZip)) { throw 'Tesseract is unpacked with engines/7zip: use -Only 7zip,tesseract.' }
+    $target = Join-Path $Destination 'tesseract'
+    Reset-Folder $target
+    & $sevenZip x -y "-o$target" $setup | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "7-Zip could not unpack the Tesseract installer (exit code $LASTEXITCODE)." }
+    foreach ($folder in '$PLUGINSDIR', 'tessdata') { Remove-Item -LiteralPath (Join-Path $target $folder) -Recurse -Force -ErrorAction SilentlyContinue }
+    Get-ChildItem $target -File | Where-Object { $_.Extension -in '.exe', '.html' -and $_.Name -ne 'tesseract.exe' } | Remove-Item -Force
+    if (-not (Test-Path (Join-Path $target 'tesseract.exe'))) { throw 'tesseract.exe not found in the installer.' }
 }
 
 if ('calibre' -in $selected) {

@@ -71,6 +71,7 @@ public static class BuiltInData
             Pdf = { SplitPages = true }, Output = { Location = OutputLocation.Subfolder, SubfolderName = "{name}" },
         },
         .. PdfCompressionPresets(),
+        .. OcrPresets(),
         .. PdfSlidesPresets(),
         .. FramePresets(),
         .. MotionPhotoPresets(),
@@ -121,6 +122,19 @@ public static class BuiltInData
         {
             Id = "compress-pdf", NameKey = "preset.compress_pdf", TargetFormat = "pdf",
             Pdf = { Compression = PdfCompression.Ebook }, Output = { FileNamePattern = "{name}_compressed" },
+        },
+    ];
+
+    /// <summary>
+    /// "Searchable PDF": scans and pictures with their text recognized by Tesseract (added in settings schema 33). On no
+    /// donut, like "Compress PDF".
+    /// </summary>
+    public static List<Preset> OcrPresets() =>
+    [
+        new()
+        {
+            Id = "searchable-pdf", NameKey = "preset.searchable_pdf", TargetFormat = "pdf",
+            Pdf = { Ocr = true }, Output = { FileNamePattern = "{name}_searchable" },
         },
     ];
 

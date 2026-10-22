@@ -1,11 +1,12 @@
-// PDF → HDocument with PdfPig (Apache-2.0), so PDF → DOCX / HWPX / TXT needs no Word, LibreOffice or OCR engine.
+// PDF → HDocument with PdfPig (Apache-2.0), so PDF → DOCX / HWPX / TXT needs no Word or LibreOffice.
 //
 // Every page's words (with their positions, fonts, sizes and colours) become lines, lines become paragraphs, and the
 // paragraphs and pictures are put in reading order, also on two-column pages (PdfDocumentReader.Layout). Headings
 // come from font sizes, bold / italic from the fonts, page size and margins from the page. Running headers and
 // footers (also those that change with the chapter), page numbers and a logo repeated at the top or bottom of the
 // pages are left out. A page without text (a scan) becomes the rendered page as a picture (PDFium via PDFtoImage), so
-// the result is complete; there is no OCR.
+// the result is complete. With "Recognize text" (PdfOptions.Ocr) Tesseract reads the scans first, and their invisible
+// OCR layer is the page's text (ReadWithOcrLayer).
 //
 // Rows laid out with tab stops (a number, a label and a date far to the right) stay one line with tabs at the PDF's
 // positions, and a line that ends early although the next line's first word would have fitted (an address) keeps its
@@ -102,18 +103,27 @@ internal sealed partial class PdfDocumentReader
     private readonly string _path;
     private readonly string _mediaFolder;
     private readonly bool _textOnly;
+    private readonly bool _ocrLayer;
     private byte[]? _pdfBytes;
     private int _pictures;
 
-    private PdfDocumentReader(string path, string mediaFolder, bool textOnly)
+    private PdfDocumentReader(string path, string mediaFolder, bool textOnly, bool ocrLayer = false)
     {
         _path = path;
         _mediaFolder = mediaFolder;
         _textOnly = textOnly;
+        _ocrLayer = ocrLayer;
     }
 
     /// <summary>Reads <paramref name="path"/> with pictures (extracted into <paramref name="mediaFolder"/>) and scans.</summary>
     public static HDocument Read(string path, string mediaFolder) => new PdfDocumentReader(path, mediaFolder, textOnly: false).ReadDocument();
+
+    /// <summary>
+    /// Like <see cref="Read"/>, but the invisible text of a scan (its OCR layer, PdfOptions.Ocr) is the page's text:
+    /// the words become paragraphs and the scan under them is left out.
+    /// </summary>
+    public static HDocument ReadWithOcrLayer(string path, string mediaFolder) =>
+        new PdfDocumentReader(path, mediaFolder, textOnly: false, ocrLayer: true).ReadDocument();
 
     /// <summary>
     /// Reads only the text, including invisible text (the OCR layer of scanned PDFs); pictures and scans are left out.
@@ -296,16 +306,21 @@ internal sealed partial class PdfDocumentReader
             var letters = word.Letters.Where(l => !string.IsNullOrWhiteSpace(l.Value)).ToList();
             if (letters.Count == 0)
                 continue;
-            // Invisible text is the OCR layer of a scan: part of the text, not of the page's look.
-            if (!_textOnly && letters.All(l => l.RenderingMode == TextRenderingMode.Neither))
+            // Invisible text is the OCR layer of a scan: part of the text, not of the page's look (unless OCR was asked for).
+            var invisible = letters.All(l => l.RenderingMode == TextRenderingMode.Neither);
+            if (!_textOnly && !_ocrLayer && invisible)
                 continue;
             var lead = string.IsNullOrWhiteSpace(word.Lead.Value) ? letters[0] : word.Lead;
             var box = Shift(word.Box, crop);
             var size = Median(letters.Select(LetterSize));
             var center = new PdfPoint((box.Left + box.Right) / 2, (box.Top + box.Bottom) / 2);
             var link = links.FirstOrDefault(l => Inside(l.Bounds, center)).Uri;
+            var format = Format(lead, size);
+            // An OCR layer's font only places the words (Tesseract's GlyphLessFont): the document's own font is used.
+            if (invisible)
+                format = format with { Font = null, Bold = false, Italic = false };
             words.Add(new TextWord(CleanText(word.Text), box.Left, box.Right, box.Top, box.Bottom,
-                lead.StartBaseLine.Y - crop.Bottom, Math.Max(1, size), Format(lead, size), link));
+                lead.StartBaseLine.Y - crop.Bottom, Math.Max(1, size), format, link));
         }
 
         if (words.Count == 0 || (rotated && !_textOnly))

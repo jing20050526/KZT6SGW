@@ -750,6 +750,13 @@ internal static class SettingsMigrations
         // v32: logs and script source, Video CD DAT and Workbench archives learn their donuts; custom claims stay put.
         if (from < 32)
             changed |= LearnExtensions(profiles, out _, ["log", "py", "pac", "bat", "command", "dat", "wbpz"]);
+        // v33: "Searchable PDF" (text recognition), after "Compress PDF" as in a new library, on no donut.
+        if (from < 33 && !presets.Any(p => p.Id == "searchable-pdf"))
+        {
+            var at = presets.FindIndex(p => p.Id == "compress-pdf");
+            presets.Insert(at < 0 ? presets.Count : at + 1, BuiltInData.OcrPresets().Single());
+            changed = true;
+        }
         return changed;
     }
 
