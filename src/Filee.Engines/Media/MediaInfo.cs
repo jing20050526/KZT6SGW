@@ -71,8 +71,12 @@ internal sealed record AudioStreamInfo(int Channels, int SampleRate, string? Cod
 /// <param name="Audio">First audio stream, if any.</param>
 /// <param name="CoverStreamIndex">Index of an embedded cover picture (JPEG or PNG) such as album art, if any.</param>
 /// <param name="SubtitleStreams">Every subtitle stream in file order, null when there is none.</param>
+/// <param name="RawStream">
+/// A bare H.264 / H.265 stream with no container (a camera's .h264 / .h265): its frames carry no timestamps, so it is
+/// always encoded, never copied into a container.
+/// </param>
 internal sealed record MediaInfo(TimeSpan? Duration, VideoStreamInfo? Video, AudioStreamInfo? Audio, int? CoverStreamIndex,
-    IReadOnlyList<SubtitleStreamInfo>? SubtitleStreams = null)
+    IReadOnlyList<SubtitleStreamInfo>? SubtitleStreams = null, bool RawStream = false)
 {
     /// <summary>Every subtitle stream, in file order.</summary>
     public IReadOnlyList<SubtitleStreamInfo> Subtitles => SubtitleStreams ?? [];
@@ -142,8 +146,9 @@ internal sealed record MediaInfo(TimeSpan? Duration, VideoStreamInfo? Video, Aud
         var seconds = root.TryGetProperty("format", out var format) ? Number(format, "duration") : 0;
         if (seconds <= 0)
             seconds = longestStream;
+        var raw = root.TryGetProperty("format", out var container) && Text(container, "format_name") is "h264" or "hevc";
         return new MediaInfo(seconds > 0 ? TimeSpan.FromSeconds(seconds) : null, video, audio, cover,
-            subtitles.Count > 0 ? subtitles : null);
+            subtitles.Count > 0 ? subtitles : null, raw);
     }
 
     /// <summary>The colour tags of a video stream; null when it has none ("unknown" counts as none).</summary>

@@ -163,6 +163,8 @@ public static class FormatRegistry
         new("toml", "TOML", FormatCategory.Data, ["toml"]),
         new("xml", "XML", FormatCategory.Data, ["xml"]),
         new("vcf", "vCard", FormatCategory.Data, ["vcf", "vcard"]),
+        // A browser's recorded network requests (HTTP Archive): JSON, read as one table row per request (issue #328).
+        new("har", "HAR", FormatCategory.Data, ["har"], Writable: false),
 
         // E-books
         new("epub", "EPUB", FormatCategory.Ebook, ["epub"]),
@@ -214,6 +216,9 @@ public static class FormatRegistry
         new("swf", "SWF", FormatCategory.Video, ["swf"], Writable: false),
         new("wtv", "WTV", FormatCategory.Video, ["wtv", "dvr-ms", "dvr"], Writable: false),
         new("cavs", "CAVS", FormatCategory.Video, ["cavs"], Writable: false),
+        // Raw H.265 / H.264 streams with no container, as security cameras and VMS software export them (issue #301).
+        new("h265", "H.265", FormatCategory.Video, ["h265", "265", "hevc"], Writable: false),
+        new("h264", "H.264", FormatCategory.Video, ["h264", "264"], Writable: false),
 
         // Audio
         new("mp3", "MP3", FormatCategory.Audio, ["mp3"]),

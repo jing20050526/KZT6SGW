@@ -43,6 +43,7 @@ public static class BuiltInData
             Id = "remove-background", NameKey = "preset.remove_background", TargetFormat = "png",
             Image = { RemoveBackground = true }, Output = { FileNamePattern = "{name}_transparent" },
         },
+        .. TrimPresets(),
         new()
         {
             Id = "tool-crop", NameKey = "preset.crop", TargetFormat = SameAsSource,
@@ -109,6 +110,19 @@ public static class BuiltInData
     [
         new() { Id = "live-photo-iphone", NameKey = "preset.live_photo_iphone", TargetFormat = "jpg", Media = { LivePhoto = LivePhotoKind.Apple } },
         new() { Id = "motion-photo-android", NameKey = "preset.motion_photo_android", TargetFormat = "jpg", Media = { LivePhoto = LivePhotoKind.Android } },
+    ];
+
+    /// <summary>
+    /// "Trim transparent borders" (issue #332, added in settings schema 33): a copy cropped to the visible pixels, in the
+    /// same format. On the images donut's back face after "Remove background".
+    /// </summary>
+    public static List<Preset> TrimPresets() =>
+    [
+        new()
+        {
+            Id = "trim-transparent", NameKey = "preset.trim_transparent", TargetFormat = SameAsSource,
+            Image = { TrimTransparent = true }, Output = { FileNamePattern = "{name}_trimmed" },
+        },
     ];
 
     /// <summary>
@@ -363,7 +377,8 @@ public static class BuiltInData
             Id = "images", NameKey = "profile.images",
             Extensions = ExtensionsOf(FormatCategory.Image),
             PresetIds = ["to-png", "to-jpg", "to-webp", "to-pdf", "trace-svg", "trace-line-art", "to-tiff", "to-bmp", "to-ico", "half-size"],
-            BackPresetIds = ["tool-crop", "rotate", "flip", "remove-background", "grayscale", "extract-motion", "to-avif", "to-gif", "merge-pdf", "zip-all"],
+            BackPresetIds = ["tool-crop", "rotate", "flip", "remove-background", "trim-transparent", "grayscale", "extract-motion", "to-avif", "to-gif",
+                "merge-pdf", "zip-all"],
         },
         new()
         {

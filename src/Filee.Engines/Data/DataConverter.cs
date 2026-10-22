@@ -2,7 +2,8 @@
 // in-process. Every format is read into one tree (DataTree) and written from it, so structure and types carry over as
 // far as the target can hold them; see the format files for what each one loses (TOML has no null, XML no types,
 // CSV only tables). Output is UTF-8 without BOM (CSV: with BOM, like the spreadsheet engine), indented by two spaces.
-// Spreadsheets reach JSON and the others through CSV (XLSX → CSV → JSON), contacts through CSV as well.
+// Spreadsheets reach JSON and the others through CSV (XLSX → CSV → JSON), contacts through CSV as well. HAR network
+// logs are read as JSON, and become a table of their requests (HarData).
 
 using System.Text;
 using Filee.Core.Conversion;
@@ -12,7 +13,7 @@ using Filee.Engines.Office.Sheets;
 
 namespace Filee.Engines.Data;
 
-/// <summary>JSON, JSON Lines, YAML, TOML, XML and CSV into each other; vCard ↔ CSV.</summary>
+/// <summary>JSON, JSON Lines, YAML, TOML, XML and CSV into each other; vCard ↔ CSV; HAR → all of them.</summary>
 public sealed class DataConverter : IConverter
 {
     private static readonly string[] Trees = ["json", "jsonl", "yaml", "toml", "xml"];
@@ -28,6 +29,7 @@ public sealed class DataConverter : IConverter
         .. Trees.Select(to => new ConversionEdge("csv", to)),
         new("vcf", "csv"),
         new("csv", "vcf"),
+        .. Trees.Append("csv").Select(to => new ConversionEdge("har", to)),
     ];
 
     public EngineStatus GetStatus() =>
@@ -78,7 +80,7 @@ public sealed class DataConverter : IConverter
                 "xml" => XmlData.Write(tree),
                 _ => throw new NotSupportedException($"Data → {step.To} is not supported."),
             };
-            var rows = step.To == "csv" ? CsvData.Table(tree) : null;
+            var rows = step.To != "csv" ? null : step.From == "har" ? HarData.Table(tree) : CsvData.Table(tree);
             if (step.Output.Allocate(step.To) is not { } output)
                 return [];
             if (rows is not null)
@@ -99,7 +101,7 @@ public sealed class DataConverter : IConverter
 
     private static object? ReadText(string text, string format) => format switch
     {
-        "json" => JsonData.Read(text),
+        "json" or "har" => JsonData.Read(text),
         "jsonl" => JsonData.ReadLines(text),
         "yaml" => YamlData.Read(text),
         "toml" => TomlData.Read(text),

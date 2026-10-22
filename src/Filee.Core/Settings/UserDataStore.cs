@@ -750,6 +750,28 @@ internal static class SettingsMigrations
         // v32: logs and script source, Video CD DAT and Workbench archives learn their donuts; custom claims stay put.
         if (from < 32)
             changed |= LearnExtensions(profiles, out _, ["log", "py", "pac", "bat", "command", "dat", "wbpz"]);
+        // v33: HAR network logs and raw H.265 / H.264 camera streams learn their donuts (custom claims stay put), and
+        //      "Trim transparent borders" comes in after "Remove background".
+        if (from < 33)
+        {
+            changed |= LearnExtensions(profiles, out _, ["har", "h265", "265", "hevc", "h264", "264"]);
+            // "Trim transparent borders" after "Remove background", in the library and on the images donut's back face
+            // when it has room and the user hasn't put it there.
+            if (BuiltInData.TrimPresets().Single() is var trim && presets.All(p => p.Id != trim.Id))
+            {
+                var at = presets.FindIndex(p => p.Id == "remove-background");
+                presets.Insert(at < 0 ? presets.Count : at + 1, trim);
+                changed = true;
+            }
+            if (profiles.FirstOrDefault(p => p.Id == "images") is { BackPresetIds: { } back } images
+                && !back.Contains("trim-transparent") && !images.PresetIds.Contains("trim-transparent")
+                && back.Count < ToolbarProfile.MaxSlices)
+            {
+                var after = back.IndexOf("remove-background");
+                back.Insert(after < 0 ? back.Count(id => id != "zip-all") : after + 1, "trim-transparent");
+                changed = true;
+            }
+        }
         return changed;
     }
 

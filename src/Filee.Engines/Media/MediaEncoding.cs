@@ -217,7 +217,7 @@ internal static class MediaEncoding
     /// </summary>
     internal static string? HardwareCodec(string target, MediaOptions options, MediaInfo info) =>
         options.HardwareEncoding && info.Video is { } video && VideoTargets.ContainsKey(target)
-        && MediaCodecs.TakesHardwareEncoding(target, options.VideoCodec) && !CanCopyVideo(target, video, options)
+        && MediaCodecs.TakesHardwareEncoding(target, options.VideoCodec) && (info.RawStream || !CanCopyVideo(target, video, options))
             ? MediaCodecs.Effective(target, options.VideoCodec) switch
             {
                 VideoCodec.Hevc => "hevc",
@@ -237,7 +237,7 @@ internal static class MediaEncoding
         if (audio is not null)
             args.AddRange(["-map", "0:a:0"]);
 
-        if (CanCopyVideo(target, video, options))
+        if (!info.RawStream && CanCopyVideo(target, video, options))
         {
             args.AddRange(["-c:v", "copy"]);
             // Apple plays HEVC in MP4/MOV only under the "hvc1" tag (FFmpeg keeps "hev1" from some sources).

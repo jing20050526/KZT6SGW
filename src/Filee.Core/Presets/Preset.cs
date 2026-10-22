@@ -277,6 +277,12 @@ public sealed class ImageOptions
     public bool Grayscale { get; set; }
 
     /// <summary>
+    /// Crop away the fully transparent padding around a picture's visible pixels (PNGs exported with a margin, sprites,
+    /// icons). Pictures without transparency, and animations, stay as they are.
+    /// </summary>
+    public bool TrimTransparent { get; set; }
+
+    /// <summary>
     /// Make a plain background (paper behind a signature or stamp, the backdrop of a logo) transparent. Targets without
     /// an alpha channel get <see cref="Background"/> instead, so this also replaces the backdrop colour.
     /// </summary>
