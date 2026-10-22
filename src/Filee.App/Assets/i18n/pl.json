@@ -105,6 +105,7 @@
   "error.geo_unsupported_shape": "Ten rodzaj kształtu nie jest obsługiwany",
   "error.geo_too_large": "Shapefile przekroczyłby limit 2 GB tego formatu",
   "notice.pdf_not_smaller": "Nie udało się zmniejszyć pliku, więc skopiowano go bez zmian",
+  "notice.empty_spreadsheet_pages_removed": "Usunięto puste strony arkusza kalkulacyjnego",
   "notice.live_photo_pair": "Zapisano jako zdjęcie i plik MOV o tej samej nazwie. Zaimportuj je razem (Zdjęcia iCloud, AirDrop lub Zdjęcia na Macu), aby otrzymać Live Photo",
   "notice.geo_datum_assumed": "Datum nie jest WGS 84; pozycje przeliczono tak, jakby było, więc mogą się różnić nawet o setki metrów",
   "notice.geo_gpx_lossy": "GPX przechowuje tylko punkty, trasy i ślady z kilkoma polami: pozostałe atrybuty pominięto, a poligony stały się śladami",

@@ -105,6 +105,7 @@
   "error.geo_unsupported_shape": "This kind of shape isn't supported",
   "error.geo_too_large": "The Shapefile would pass the format's 2 GB limit",
   "notice.pdf_not_smaller": "Couldn't make it smaller, so it was copied as it is",
+  "notice.empty_spreadsheet_pages_removed": "Empty spreadsheet pages were removed",
   "notice.live_photo_pair": "Saved as a photo and a MOV with the same name. Import both together (iCloud Photos, AirDrop or Photos on a Mac) to get a Live Photo",
   "notice.geo_datum_assumed": "The datum isn't WGS 84; positions were converted as if it were and can be off by up to hundreds of metres",
   "notice.geo_gpx_lossy": "GPX holds only points, routes and tracks with a few fields: other attributes were left out and polygons became tracks",

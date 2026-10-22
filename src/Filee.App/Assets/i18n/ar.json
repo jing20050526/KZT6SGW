@@ -99,6 +99,7 @@
   "error.geo_unsupported_shape": "هذا النوع من الأشكال غير مدعوم",
   "error.geo_too_large": "سيتجاوز ملف Shapefile حد الصيغة البالغ 2 غيغابايت",
   "notice.pdf_not_smaller": "تعذّر تقليل الحجم، لذا نُسخ الملف كما هو",
+  "notice.empty_spreadsheet_pages_removed": "تمت إزالة صفحات جدول البيانات الفارغة",
   "notice.live_photo_pair": "حُفظ كصورة وملف MOV بالاسم نفسه. استوردهما معًا (صور iCloud أو AirDrop أو تطبيق الصور على Mac) لتحصل على Live Photo",
   "notice.geo_datum_assumed": "المرجع الجيوديسي ليس WGS 84؛ حُوّلت المواقع على افتراض أنه كذلك، وقد تنحرف بمقدار يصل إلى مئات الأمتار",
   "notice.geo_gpx_lossy": "تحتفظ GPX بالنقاط والمسارات والطرق مع حقول محدودة فقط: حُذفت السمات الأخرى وتحولت المضلعات إلى مسارات",

@@ -105,6 +105,7 @@
   "error.geo_unsupported_shape": "Ce type de forme n'est pas pris en charge",
   "error.geo_too_large": "Le Shapefile dépasserait la limite de 2 Go du format",
   "notice.pdf_not_smaller": "Impossible de réduire sa taille : le fichier a été copié tel quel",
+  "notice.empty_spreadsheet_pages_removed": "Les pages vides de la feuille de calcul ont été supprimées",
   "notice.live_photo_pair": "Enregistré en une photo et un MOV de même nom. Importez-les ensemble (Photos iCloud, AirDrop ou Photos sur Mac) pour obtenir une Live Photo",
   "notice.geo_datum_assumed": "Le datum n'est pas WGS 84 ; les positions ont été converties comme s'il l'était et peuvent être décalées de plusieurs centaines de mètres",
   "notice.geo_gpx_lossy": "GPX ne contient que des points, des routes et des traces avec quelques champs : les autres attributs ont été omis et les polygones sont devenus des traces",

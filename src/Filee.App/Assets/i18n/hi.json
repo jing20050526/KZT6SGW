@@ -99,6 +99,7 @@
   "error.geo_unsupported_shape": "इस तरह का आकार समर्थित नहीं है",
   "error.geo_too_large": "Shapefile फ़ॉर्मैट की 2 GB सीमा से बड़ी हो जाएगी",
   "notice.pdf_not_smaller": "इसे छोटा नहीं किया जा सका, इसलिए जैसा है वैसा ही कॉपी कर दिया गया",
+  "notice.empty_spreadsheet_pages_removed": "स्प्रेडशीट के खाली पृष्ठ हटा दिए गए",
   "notice.live_photo_pair": "एक ही नाम की फ़ोटो और MOV के रूप में सहेजा गया। लाइव फ़ोटो पाने के लिए दोनों को साथ में इम्पोर्ट करें (iCloud Photos, AirDrop या Mac पर Photos)",
   "notice.geo_datum_assumed": "डेटम WGS 84 नहीं है। स्थितियाँ ऐसे कन्वर्ट की गईं मानो वह WGS 84 हो, इसलिए वे कुछ सौ मीटर तक खिसक सकती हैं",
   "notice.geo_gpx_lossy": "GPX में केवल पॉइंट, रूट और ट्रैक कुछ फ़ील्ड के साथ रहते हैं: बाकी एट्रिब्यूट छोड़ दिए गए और पॉलीगॉन ट्रैक बन गए",

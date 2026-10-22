@@ -105,6 +105,7 @@
   "error.geo_unsupported_shape": "不支持此类形状",
   "error.geo_too_large": "将超过 Shapefile 2 GB 的上限",
   "notice.pdf_not_smaller": "无法再缩小，已原样复制",
+  "notice.empty_spreadsheet_pages_removed": "已移除电子表格中的空白页面",
   "notice.live_photo_pair": "已保存为同名的照片和 MOV。将两者一起导入（iCloud 照片、隔空投送或 Mac 上的“照片”）即可得到实况照片",
   "notice.geo_datum_assumed": "基准面不是 WGS 84，已按相同处理，位置可能偏差数百米",
   "notice.geo_gpx_lossy": "GPX 只能保存点、路线和轨迹及少数字段，其他属性已省略，面变成了轨迹",
