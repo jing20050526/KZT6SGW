@@ -21,6 +21,7 @@ internal static class AppLanguages
         ("pt-BR", "Português (Brasil)"),
         ("fr", "Français"),
         ("ne", "नेपाली"),
+        ("th", "ไทย"),
     ];
 
     /// <summary>

@@ -132,6 +132,8 @@ public sealed class LocalizationService : ILocalizer
         // "ne" and "ne-NP", but not Newari "new".
         if (ui.Equals("ne", StringComparison.OrdinalIgnoreCase) || ui.StartsWith("ne-", StringComparison.OrdinalIgnoreCase))
             return "ne";
+        if (ui.StartsWith("th", StringComparison.OrdinalIgnoreCase))
+            return "th";
         return "en";
     }
 

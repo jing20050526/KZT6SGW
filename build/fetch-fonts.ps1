@@ -22,6 +22,7 @@ $noto = 'https://raw.githubusercontent.com/notofonts/notofonts.github.io/28b15b4
 $latin = "$noto/NotoSans/hinted/ttf"
 $devanagari = "$noto/NotoSansDevanagari/hinted/ttf"
 $arabic = "$noto/NotoSansArabic/hinted/ttf"
+$thai = "$noto/NotoSansThai/hinted/ttf"
 $cjk = 'https://raw.githubusercontent.com/notofonts/noto-cjk/Sans2.004/Sans/SubsetOTF'
 
 # File name => (URL, SHA-256). Update both together when bumping a version.
@@ -35,6 +36,9 @@ $fonts = [ordered]@{
     'NotoSansDevanagari-Regular.ttf' = @("$devanagari/NotoSansDevanagari-Regular.ttf", '306B53ECFB182A504DD8A7446093C316387D2FD8DC350D0792ED1753FE0996CD')
     'NotoSansDevanagari-Medium.ttf'  = @("$devanagari/NotoSansDevanagari-Medium.ttf", '4F46CF50B7992E61C7CEE7C4A8284450CCEED8B540B8ADBC8DF637C982C65757')
     'NotoSansDevanagari-Bold.ttf'    = @("$devanagari/NotoSansDevanagari-Bold.ttf", '3AD8362A06271814869838DCC3D161B13C9FB97681B627AF1F7F283EA9387D56')
+    'NotoSansThai-Regular.ttf'       = @("$thai/NotoSansThai-Regular.ttf", '61CF814EEC46B294D6EA4401AC295D0CECD5207BD2331DCC5A15E7301D30EE44')
+    'NotoSansThai-Medium.ttf'        = @("$thai/NotoSansThai-Medium.ttf", '11BC8F6CF3523241995F07225FCC7D8E25EB55064FBFA39281A5E44DCD59F5F5')
+    'NotoSansThai-Bold.ttf'          = @("$thai/NotoSansThai-Bold.ttf", '2AC6C6E8A478E23B15F76E4894AF1FA2210F8F350E4E6E54AAD530BEC03EFBFB')
     'NotoSansJP-Regular.otf'         = @("$cjk/JP/NotoSansJP-Regular.otf", 'DFF723BA59D57D136764A04B9B2D03205544F7CD785A711442D6D2D085AC5073')
     'NotoSansJP-Bold.otf'            = @("$cjk/JP/NotoSansJP-Bold.otf", '1B0EDFB500B73A4FA8A4FCAAE1BBBD403994E08E73E3E0DA37E70D3853F42C5F')
     'NotoSansKR-Regular.otf'         = @("$cjk/KR/NotoSansKR-Regular.otf", '69975A0AC8472717870AEFEAB0A4D52739308D90856B9955313B2AD5E0148D68')

@@ -21,6 +21,7 @@ internal static class SoftPalette
     private const string Latin = "fonts:Filee#Noto Sans";
     private const string Arabic = "fonts:Filee#Noto Sans Arabic";
     private const string Devanagari = "fonts:Filee#Noto Sans Devanagari";
+    private const string Thai = "fonts:Filee#Noto Sans Thai";
 
     /// <summary>Each CJK region's embedded font and its system fonts (Windows, then macOS).</summary>
     private static readonly (string Embedded, string System) Japanese =
@@ -77,7 +78,7 @@ internal static class SoftPalette
             : [Korean, Chinese, Japanese];
         var traditional = AppLanguages.IsTraditionalChinese(language) ? $"{TraditionalChineseSystem}, " : "";
         // Noto Sans comes first: the first face also draws the trimming ellipsis, which Noto Sans Arabic lacks.
-        return $"{Latin}, {Arabic}, {Devanagari}, {traditional}{string.Join(", ", cjk.Select(f => f.Embedded))}, Segoe UI, Nirmala UI, "
+        return $"{Latin}, {Arabic}, {Devanagari}, {Thai}, {traditional}{string.Join(", ", cjk.Select(f => f.Embedded))}, Segoe UI, Nirmala UI, "
             + $"{string.Join(", ", cjk.Select(f => f.System))}, Kohinoor Devanagari, Geeza Pro, sans-serif";
     }
 
