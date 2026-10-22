@@ -1,6 +1,7 @@
 {
   "app.name": "Filee",
   "app.tagline": "اسحب، أفلت، وحوّل.",
+
   "nav.home": "الرئيسية",
   "nav.general": "عام",
   "nav.triggers": "الاختصارات",
@@ -10,6 +11,7 @@
   "nav.theme": "المظهر",
   "nav.engines": "المحركات",
   "nav.about": "حول التطبيق",
+
   "tray.open": "فتح Filee",
   "tray.pause": "إيقاف الاختصارات مؤقتًا",
   "tray.resume": "استئناف الاختصارات",
@@ -21,6 +23,7 @@
   "close.tray": "إبقاء في منطقة الإعلام",
   "close.quit": "إنهاء",
   "close.dont_ask": "عدم السؤال مجددًا",
+
   "home.title": "الرئيسية",
   "home.drop_title": "أفلت الملفات هنا",
   "home.drop_hint": "أو اضغط باستمرار على {0} أثناء سحب الملفات في مستكشف الملفات. يفتح شريط الأدوات الدائري عند المؤشر.",
@@ -43,6 +46,7 @@
   "home.clear_history": "مسح",
   "home.files": "عدد الملفات: {0}",
   "home.failed_files": "فشل: {0}",
+
   "donut.center_drag": "اسحب الملفات إلى هنا",
   "donut.files_same": "{0} × {1}",
   "donut.files_mixed": "عدد الملفات: {0}",
@@ -58,6 +62,7 @@
   "donut.group_caption": "مجموعة من {0}",
   "donut.flip_to_back": "{0} ↻ الخلف",
   "donut.flip_to_front": "{0} ↻ الأمام",
+
   "toast.converting": "تحويل {0} إلى {1}",
   "toast.done": "اكتمل",
   "toast.done_errors": "فشل {0} من أصل {1}",
@@ -68,6 +73,7 @@
   "toast.cancel": "إلغاء",
   "download.badge": "{0}/ث · {1}",
   "download.badge_files": "{0} · {1} من أصل {2} من الملفات",
+
   "error.unsupported_source": "نوع الملف هذا غير مدعوم",
   "error.empty_file": "الملف فارغ (0 بايت). يبقى الملف المُنشأ باستخدام «جديد» من قائمة النقر بالزر الأيمن فارغًا حتى تفتحه في تطبيقه وتحفظه",
   "format_request.request": "طلب دعم هذه الصيغة",
@@ -107,6 +113,7 @@
   "notice.geo_rows_without_location": "بعض الصفوف لا تحتوي على موقع صالح، فتم الاحتفاظ بها دون شكل هندسي",
   "notice.geo_field_names": "الحد الأقصى لأسماء حقول Shapefile هو 10 محارف: اختُصرت بعض الأسماء",
   "notice.geo_shapefile_split": "تحتفظ Shapefile بنوع واحد من الأشكال، لذا حُفظت النقاط والخطوط والمضلعات في ملفات منفصلة",
+
   "engine.reason.not_installed": "غير مثبّت",
   "engine.reason.error": "خطأ أثناء التحقق",
   "engine.reason.unsupported_platform": "غير متاح على هذا النظام",
@@ -140,6 +147,7 @@
   "engine.ghostscript.description": "تحويل EPS وPostScript وملفات Illustrator القديمة إلى PDF وصور؛ وتحويل PDF إلى EPS وPS.",
   "engine.calibre.description": "صيغ الكتب الإلكترونية النادرة (LIT وLRF وCHM وPDB وRB…) وإخراج Kindle ‏(MOBI وAZW3).\nعند وضعه فوق محرك كتابة HWPX، يُنشئ أيضًا PDF من الكتب الإلكترونية (بسرعة أكبر بكثير للكتب الطويلة).",
   "engine.libreoffice.description": "قراءة الصيغ القديمة والأقل شيوعًا: DOC وPPT وPages وKeynote وNumbers وWordPerfect وClarisWorks وPublisher وVisio…\nوالحفظ بصيغ DOC وXLS وPPT وODT وODP وقوالب OpenDocument وEMF.",
+
   "profile.images": "الصور",
   "profile.pdf": "PDF",
   "profile.office": "المستندات",
@@ -159,6 +167,7 @@
   "profile.models": "النماذج ثلاثية الأبعاد",
   "profile.geo": "البيانات الجغرافية",
   "profile.mixed": "ملفات متنوعة",
+
   "preset.crop": "اقتصاص",
   "crop.save": "اقتصاص وحفظ",
   "crop.reset": "إعادة تعيين",
@@ -180,6 +189,7 @@
   "crop.state_done": "تم الاقتصاص",
   "crop.state_skipped": "تم التخطي",
   "crop.state_failed": "فشل",
+
   "preset.half_size": "نصف الحجم",
   "preset.grayscale": "تدرّج رمادي",
   "preset.remove_background": "إزالة الخلفية",
@@ -212,6 +222,7 @@
   "preset.extract_motion": "استخراج فيديو Live Photo",
   "preset.live_photo_iphone": "Live Photo (iPhone)",
   "preset.motion_photo_android": "Motion Photo (Android)",
+
   "format.folder": "مجلد",
   "format.category.Image": "صورة",
   "format.category.Pdf": "PDF",
@@ -231,6 +242,7 @@
   "format.category.Data": "بيانات",
   "format.category.Model3D": "نموذج ثلاثي الأبعاد",
   "format.category.Geo": "بيانات جغرافية",
+
   "general.title": "عام",
   "general.language": "اللغة",
   "general.language_auto": "لغة النظام",
@@ -309,6 +321,7 @@
   "general.reset_library": "استعادة الافتراضيات",
   "general.reset_confirm": "هل تريد استبدال جميع الإعدادات المسبقة وملفات تعريف شريط الأدوات بالافتراضيات؟",
   "general.imported": "عدد العناصر المستوردة: {0}",
+
   "triggers.title": "الاختصارات",
   "triggers.description": "اختر طريقة فتح شريط الأدوات الدائري. يمكنك إضافة ما تشاء من الإيماءات.",
   "triggers.macos_permissions": "اسمح لـ Filee من إعدادات النظام > الخصوصية والأمن > تسهيلات الاستخدام.\nيطلب Finder أيضًا إذن الأتمتة عند استخدام اختصار الملفات المحددة للمرة الأولى.",
@@ -361,6 +374,7 @@
   "triggers.excluded_none_running": "لا توجد نافذة مفتوحة لأي تطبيق آخر.",
   "triggers.excluded_note": "لن تعمل الإيماءات والاختصارات عندما يكون المؤشر فوق هذه التطبيقات.",
   "triggers.paused": "الاختصارات متوقفة مؤقتًا",
+
   "toolbar.title": "شريط الأدوات الدائري",
   "toolbar.step_profile": "1. اختر ملف تعريف",
   "toolbar.step_arrange": "2. رتّب الإعدادات المسبقة",
@@ -422,6 +436,7 @@
   "toolbar.mixed_others": "تفتح التحديدات المختلطة الأخرى «{0}».",
   "toolbar.mixed_others_self": "لا يوجد ملف تعريف مختلط بلا امتدادات محددة، لذا يُستخدم هذا الملف أيضًا لكل مزيج آخر.",
   "tags.remove": "إزالة",
+
   "presets.title": "الإعدادات المسبقة",
   "presets.add": "جديد",
   "presets.duplicate": "إنشاء نسخة",
@@ -594,18 +609,37 @@
   "presets.delete_confirm": "هل تريد حذف «{0}»؟ سيُزال أيضًا من جميع أشرطة الأدوات والمجموعات.",
   "presets.name_required": "أدخل اسمًا",
   "presets.select": "اختر إعدادًا مسبقًا لتعديله",
+
   "theme.title": "المظهر",
+  "theme.style": "نمط المظهر",
+  "theme.style.Soft": "Filee Soft",
+  "theme.style.MaterialYou": "Material You",
+  "theme.style.soft_hint": "مظهر Filee الكلاسيكي بحواف دائرية ناعمة وأسطح هادئة.",
+  "theme.style.material_you_hint": "تصميم Google Material 3 بأسطح لونية ديناميكية وأدوار تمييز متكيفة.",
+  "theme.style.m3_badge": "Material 3",
+  "theme.style.m3_tag": "M3",
   "theme.mode": "نمط العرض",
   "theme.mode.System": "حسب النظام",
   "theme.mode.Light": "فاتح",
   "theme.mode.Dark": "داكن",
   "theme.accent": "اللون المميّز",
+  "theme.presets_pastel": "أنماط هادئة",
+  "theme.presets_vibrant": "عينات حيوية",
+  "theme.preset.monochrome": "أحادي اللون",
+  "theme.preset.lavender": "خزامى",
+  "theme.preset.peach": "خوخي",
+  "theme.preset.mint": "نعناعي",
+  "theme.preset.rose": "وردي",
+  "theme.preset.sky": "سماوي",
+  "theme.preset.amber": "كهرماني",
+  "theme.preset.sage": "مريمي",
   "theme.custom_color": "لون مخصّص",
   "theme.corner_radius": "استدارة الزوايا",
   "theme.donut_opacity": "شفافية شريط الأدوات الدائري",
   "theme.reduce_motion": "تقليل الرسوم المتحركة",
   "theme.reduce_motion_hint": "موصى به للحواسيب القديمة. يعطّل الانتقالات وحركة ارتداد الشريط الدائري.",
   "theme.preview": "معاينة",
+
   "engines.title": "محركات التحويل",
   "engines.description": "يختار Filee أفضل محرك متاح لكل تحويل.\nإذا أمكن لعدة محركات تنفيذ المهمة نفسها، تكون الأولوية للأعلى في القائمة.",
   "engines.available": "جاهز",
@@ -676,6 +710,7 @@
   "engines.state.unpacking": "جارٍ التثبيت…",
   "engines.state.installed": "مثبّت",
   "engines.state.failed": "فشل: {0}",
+
   "about.title": "حول التطبيق",
   "about.updates": "التحديثات",
   "common.search": "بحث",
@@ -700,6 +735,7 @@
   "feedback.notice_text": "تساعد نجمة على GitHub الآخرين على اكتشاف Filee.\nنرحّب أيضًا بالمشكلات والأفكار.",
   "feedback.star": "إضافة نجمة على GitHub",
   "feedback.issue": "الإبلاغ عن مشكلة أو فكرة",
+
   "common.ok": "موافق",
   "common.cancel": "إلغاء",
   "common.save": "حفظ",
@@ -709,6 +745,7 @@
   "common.no": "لا",
   "common.on": "مفعّل",
   "common.off": "معطّل",
+
   "setup.title": "اختر محركات التحويل",
   "setup.description": "تحويل الصور وPDF ومستندات Office وHWP والكتب الإلكترونية والأرشيفات والخطوط ورسومات CAD والنماذج ثلاثية الأبعاد متاح بالفعل.\nنزّل المحركات للفيديو والصوت أو الصيغ النادرة فقط.",
   "setup.note": "يمكنك تثبيت المحركات أو إزالتها في أي وقت من الإعدادات ← المحركات.",
@@ -869,6 +906,7 @@
   "watch.status_starting": "جارٍ البدء…",
   "watch.status_error": "تعذّرت مراقبة هذا المجلد: {0}",
   "watch.cli_hint": "متاح أيضًا من سطر الأوامر: filee watch <folder> --to <format>",
+
   "whats_new.title": "الجديد في Filee {0}",
   "whats_new.previous": "السابق",
   "whats_new.next": "التالي",

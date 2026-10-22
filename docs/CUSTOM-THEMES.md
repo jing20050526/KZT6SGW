@@ -35,6 +35,9 @@ Filee's own colours can be replaced with a `theme.json` file in the folder that 
 
 Keep `text` and `textSecondary` readable on `page`, `surface` and `surfaceAlt`: they are drawn on all three.
 
-Keep `dark` colours dark and `light` colours light. Text boxes, drop-downs, check boxes, menus, tooltips and plain
-buttons come from Avalonia's Fluent theme and keep its standard light/dark look; they do not follow `theme.json`. A
-white `page` in the `dark` variant would put white-on-white text boxes on it.
+Keep `dark` colours dark and `light` colours light. In Filee's default Soft style, text boxes,
+drop-downs, check boxes, menus, tooltips and plain buttons come from Avalonia's Fluent theme and
+keep its standard light/dark look; they do not follow `theme.json`. Under the Material You style,
+text boxes, drop-downs and check boxes follow the dynamic tonal surface colors and corner radii
+from `theme.json` and the accent colour. A white `page` in the `dark` variant would put white-on-white
+controls on it.

@@ -1,6 +1,7 @@
 {
   "app.name": "Filee",
   "app.tagline": "खींचें, छोड़ें, कन्वर्ट हो गया।",
+
   "nav.home": "होम",
   "nav.general": "सामान्य",
   "nav.triggers": "शॉर्टकट",
@@ -10,6 +11,7 @@
   "nav.theme": "थीम",
   "nav.engines": "इंजन",
   "nav.about": "परिचय",
+
   "tray.open": "Filee खोलें",
   "tray.pause": "शॉर्टकट रोकें",
   "tray.resume": "शॉर्टकट फिर शुरू करें",
@@ -21,6 +23,7 @@
   "close.tray": "ट्रे में रखें",
   "close.quit": "बंद करें",
   "close.dont_ask": "दोबारा न पूछें",
+
   "home.title": "होम",
   "home.drop_title": "फ़ाइलें यहाँ छोड़ें",
   "home.drop_hint": "या Explorer में फ़ाइलें खींचते समय {0} दबाए रखें। डोनट टूलबार आपके कर्सर पर खुलेगा।",
@@ -43,6 +46,7 @@
   "home.clear_history": "साफ़ करें",
   "home.files": "{0} फ़ाइलें",
   "home.failed_files": "{0} विफल",
+
   "donut.center_drag": "फ़ाइलें यहाँ लाएँ",
   "donut.files_same": "{0} × {1}",
   "donut.files_mixed": "{0} फ़ाइलें",
@@ -58,6 +62,7 @@
   "donut.group_caption": "{0} का समूह",
   "donut.flip_to_back": "{0} ↻ पीछे",
   "donut.flip_to_front": "{0} ↻ आगे",
+
   "toast.converting": "{0} → {1}",
   "toast.done": "हो गया",
   "toast.done_errors": "{1} में से {0} विफल",
@@ -68,6 +73,7 @@
   "toast.cancel": "रद्द करें",
   "download.badge": "{0}/s · {1}",
   "download.badge_files": "{0} · {2} में से {1} फ़ाइल",
+
   "error.unsupported_source": "यह फ़ाइल प्रकार समर्थित नहीं है",
   "error.empty_file": "फ़ाइल खाली है (0 बाइट)। राइट-क्लिक मेनू के “नया” से बनाई गई फ़ाइल तब तक खाली रहती है, जब तक आप उसे उसके ऐप में खोलकर सेव न करें",
   "format_request.request": "इस फ़ॉर्मैट का अनुरोध करें",
@@ -107,6 +113,7 @@
   "notice.geo_rows_without_location": "कुछ पंक्तियों में इस्तेमाल लायक स्थान नहीं है, उन्हें बिना आकार के रखा गया",
   "notice.geo_field_names": "Shapefile फ़ील्ड के नाम ज़्यादा से ज़्यादा 10 अक्षरों के होते हैं: कुछ नाम छोटे किए गए",
   "notice.geo_shapefile_split": "Shapefile में एक ही तरह का आकार रहता है, इसलिए पॉइंट, लाइन और पॉलीगॉन अलग-अलग फ़ाइलों में सहेजे गए",
+
   "engine.reason.not_installed": "इंस्टॉल नहीं है",
   "engine.reason.error": "जाँच के दौरान त्रुटि",
   "engine.reason.unsupported_platform": "इस प्लेटफ़ॉर्म पर उपलब्ध नहीं है",
@@ -140,6 +147,7 @@
   "engine.ghostscript.description": "EPS, PostScript और पुरानी Illustrator फ़ाइलें PDF और इमेज में; PDF से EPS और PS।",
   "engine.calibre.description": "दुर्लभ ई-बुक फ़ॉर्मैट (LIT, LRF, CHM, PDB, RB…) और Kindle आउटपुट (MOBI, AZW3)।\nHWPX writer के ऊपर होने पर यह ई-बुक के PDF भी बनाता है (लंबी किताबों के लिए बहुत तेज़)।",
   "engine.libreoffice.description": "पुराने और कम प्रचलित फ़ॉर्मैट पढ़ता है: DOC, PPT, Pages, Keynote, Numbers, WordPerfect, ClarisWorks, Publisher, Visio…\nDOC, XLS, PPT, ODT, ODP, OpenDocument टेम्पलेट और EMF के रूप में सहेजता भी है।",
+
   "profile.images": "इमेज",
   "profile.pdf": "PDF",
   "profile.office": "दस्तावेज़",
@@ -159,6 +167,7 @@
   "profile.models": "3D मॉडल",
   "profile.geo": "भू-स्थानिक",
   "profile.mixed": "मिली-जुली फ़ाइलें",
+
   "preset.crop": "क्रॉप करें",
   "crop.save": "क्रॉप करके सहेजें",
   "crop.reset": "रीसेट करें",
@@ -180,6 +189,7 @@
   "crop.state_done": "क्रॉप हो गया",
   "crop.state_skipped": "छोड़ा गया",
   "crop.state_failed": "विफल",
+
   "preset.half_size": "आधा आकार",
   "preset.grayscale": "ग्रेस्केल",
   "preset.remove_background": "बैकग्राउंड हटाएँ",
@@ -212,6 +222,7 @@
   "preset.extract_motion": "लाइव फ़ोटो वीडियो निकालें",
   "preset.live_photo_iphone": "लाइव फ़ोटो (iPhone)",
   "preset.motion_photo_android": "मोशन फ़ोटो (Android)",
+
   "format.folder": "फ़ोल्डर",
   "format.category.Image": "इमेज",
   "format.category.Pdf": "PDF",
@@ -231,6 +242,7 @@
   "format.category.Data": "डेटा",
   "format.category.Model3D": "3D मॉडल",
   "format.category.Geo": "भू-स्थानिक",
+
   "general.title": "सामान्य",
   "general.language": "भाषा",
   "general.language_auto": "सिस्टम डिफ़ॉल्ट",
@@ -309,6 +321,7 @@
   "general.reset_library": "डिफ़ॉल्ट पर रीसेट करें",
   "general.reset_confirm": "सभी प्रीसेट और टूलबार प्रोफ़ाइल को डिफ़ॉल्ट से बदल दें?",
   "general.imported": "{0} आइटम इम्पोर्ट किए गए",
+
   "triggers.title": "शॉर्टकट",
   "triggers.description": "चुनें कि डोनट टूलबार कैसे खुले। आप जितने चाहें उतने जेस्चर जोड़ सकते हैं।",
   "triggers.macos_permissions": "सिस्टम सेटिंग्स > Privacy & Security > Accessibility में Filee को अनुमति दें।\nचयन वाले शॉर्टकट पहली बार इस्तेमाल करने पर Finder Automation की अनुमति भी माँगता है।",
@@ -361,6 +374,7 @@
   "triggers.excluded_none_running": "किसी अन्य ऐप की विंडो खुली नहीं है।",
   "triggers.excluded_note": "पॉइंटर इन ऐप्स पर होने पर जेस्चर और शॉर्टकट कुछ नहीं करते।",
   "triggers.paused": "शॉर्टकट रुके हुए हैं",
+
   "toolbar.title": "डोनट टूलबार",
   "toolbar.step_profile": "1. प्रोफ़ाइल चुनें",
   "toolbar.step_arrange": "2. प्रीसेट व्यवस्थित करें",
@@ -422,6 +436,7 @@
   "toolbar.mixed_others": "फ़ाइलों के अन्य मिश्रण “{0}” खोलते हैं।",
   "toolbar.mixed_others_self": "कोई मिश्रित प्रोफ़ाइल बिना चयन के नहीं बची है, इसलिए यह प्रोफ़ाइल हर अन्य मिश्रण के लिए भी इस्तेमाल होती है।",
   "tags.remove": "हटाएँ",
+
   "presets.title": "प्रीसेट",
   "presets.add": "नया",
   "presets.duplicate": "डुप्लिकेट करें",
@@ -594,18 +609,37 @@
   "presets.delete_confirm": "“{0}” हटाएँ? यह हर टूलबार और समूह से भी हट जाएगा।",
   "presets.name_required": "नाम दर्ज करें",
   "presets.select": "संपादित करने के लिए कोई प्रीसेट चुनें",
+
   "theme.title": "थीम",
+  "theme.style": "थीम शैली",
+  "theme.style.Soft": "Filee Soft",
+  "theme.style.MaterialYou": "Material You",
+  "theme.style.soft_hint": "कोमल घुमावदार कोनों और पेस्टल सतहों के साथ क्लासिक Filee रूप।",
+  "theme.style.material_you_hint": "गतिशील टोनल सतहों और अनुकूलनीय एक्सेंट भूमिकाओं के साथ Google Material 3 डिज़ाइन।",
+  "theme.style.m3_badge": "Material 3",
+  "theme.style.m3_tag": "M3",
   "theme.mode": "रूप",
   "theme.mode.System": "सिस्टम",
   "theme.mode.Light": "लाइट",
   "theme.mode.Dark": "डार्क",
   "theme.accent": "एक्सेंट रंग",
+  "theme.presets_pastel": "पेस्टल प्रीसेट",
+  "theme.presets_vibrant": "चमकदार नमूने",
+  "theme.preset.monochrome": "मोनोक्रोम",
+  "theme.preset.lavender": "लैवेंडर",
+  "theme.preset.peach": "पीच",
+  "theme.preset.mint": "मिंट",
+  "theme.preset.rose": "गुलाब",
+  "theme.preset.sky": "आसमानी",
+  "theme.preset.amber": "एम्बर",
+  "theme.preset.sage": "सेज",
   "theme.custom_color": "कस्टम",
   "theme.corner_radius": "कोमलता",
   "theme.donut_opacity": "डोनट टूलबार की अपारदर्शिता",
   "theme.reduce_motion": "एनिमेशन कम करें",
   "theme.reduce_motion_hint": "पुराने PC के लिए अनुशंसित। ट्रांज़िशन और डोनट की उछाल बंद कर देता है।",
   "theme.preview": "प्रीव्यू",
+
   "engines.title": "कन्वर्ज़न इंजन",
   "engines.description": "Filee हर कन्वर्ज़न के लिए उपलब्ध सबसे अच्छा इंजन चुनता है।\nजब कई इंजन एक ही काम कर सकते हैं, तो ऊपर वाला चुना जाता है।",
   "engines.available": "तैयार",
@@ -676,6 +710,7 @@
   "engines.state.unpacking": "इंस्टॉल हो रहा है…",
   "engines.state.installed": "इंस्टॉल हो गया",
   "engines.state.failed": "विफल: {0}",
+
   "about.title": "परिचय",
   "about.updates": "अपडेट",
   "common.search": "खोजें",
@@ -700,6 +735,7 @@
   "feedback.notice_text": "GitHub पर एक स्टार दूसरों को Filee खोजने में मदद करता है।\nसमस्याओं और विचारों का भी स्वागत है।",
   "feedback.star": "GitHub पर स्टार दें",
   "feedback.issue": "समस्या या विचार बताएँ",
+
   "common.ok": "ठीक है",
   "common.cancel": "रद्द करें",
   "common.save": "सहेजें",
@@ -709,6 +745,7 @@
   "common.no": "नहीं",
   "common.on": "चालू",
   "common.off": "बंद",
+
   "setup.title": "कन्वर्ज़न इंजन चुनें",
   "setup.description": "इमेज, PDF, Office दस्तावेज़, HWP, ई-बुक, आर्काइव, फ़ॉन्ट, CAD और 3D मॉडल पहले से कन्वर्ट होते हैं।\nइंजन केवल वीडियो और ऑडियो या दुर्लभ फ़ॉर्मैट के लिए डाउनलोड करें।",
   "setup.note": "आप कभी भी सेटिंग्स → इंजन में इंजन इंस्टॉल या हटा सकते हैं।",

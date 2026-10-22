@@ -13,6 +13,12 @@ public enum ThemeMode
     Dark,
 }
 
+public enum ThemeStyle
+{
+    Soft,
+    MaterialYou,
+}
+
 /// <summary>What closing the main window does (Settings → General).</summary>
 public enum CloseAction
 {
@@ -29,10 +35,15 @@ public enum CloseAction
 /// <summary>Look and feel.</summary>
 public sealed class ThemeSettings
 {
+    public ThemeStyle Style { get; set; } = ThemeStyle.Soft;
+
     public ThemeMode Mode { get; set; } = ThemeMode.System;
 
     /// <summary>Accent colour as <c>#RRGGBB</c>.</summary>
     public string Accent { get; set; } = "#7F77DD";
+
+    /// <summary>Active curated preset key (e.g. "mint", "peach") when a coordinated light/dark pair is used; null for custom choices.</summary>
+    public string? PresetKey { get; set; }
 
     /// <summary>Base corner radius in pixels. Larger = "softer" UI.</summary>
     public double CornerRadius { get; set; } = 16;

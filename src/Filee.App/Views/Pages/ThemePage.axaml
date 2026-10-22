@@ -2,12 +2,136 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Filee.App.ViewModels.Pages"
              xmlns:c="using:Filee.App.Controls"
+             xmlns:settings="using:Filee.Core.Settings"
              x:Class="Filee.App.Views.Pages.ThemePage"
              x:DataType="vm:ThemePageViewModel">
+  <UserControl.Styles>
+    <Style Selector="Button.choice-card">
+      <Setter Property="CornerRadius" Value="{DynamicResource SoftRadius}" />
+      <Setter Property="Padding" Value="14,10" />
+      <Setter Property="MinHeight" Value="68" />
+      <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SubtleBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1.5" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Stretch" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="{StaticResource SoftEase}" />
+          <BrushTransition Property="Background" Duration="0:0:0.18" />
+          <BrushTransition Property="BorderBrush" Duration="0:0:0.18" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Button.choice-card:pointerover">
+      <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentSoftBrush}" />
+    </Style>
+    <Style Selector="Button.choice-card.selected">
+      <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+      <Setter Property="BorderThickness" Value="1.5" />
+    </Style>
+    <Style Selector="Button.choice-card TextBlock.choice-title">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="Button.choice-card.selected TextBlock.choice-title">
+      <Setter Property="Foreground" Value="{DynamicResource AccentStrongBrush}" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="Button.choice-card TextBlock.choice-desc">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+      <Setter Property="LineHeight" Value="17" />
+    </Style>
+    <Style Selector="Button.preset-pill">
+      <Setter Property="CornerRadius" Value="{DynamicResource SoftRadiusPill}" />
+      <Setter Property="Padding" Value="10,6" />
+      <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SubtleBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="{StaticResource SoftEase}" />
+          <BrushTransition Property="Background" Duration="0:0:0.18" />
+          <BrushTransition Property="BorderBrush" Duration="0:0:0.18" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Button.preset-pill:pointerover">
+      <Setter Property="RenderTransform" Value="scale(1.03)" />
+      <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="Button.preset-pill:pressed">
+      <Setter Property="RenderTransform" Value="scale(0.96)" />
+    </Style>
+    <Style Selector=":is(TopLevel).reduced-motion Button.choice-card,
+                   :is(TopLevel).reduced-motion Button.preset-pill">
+      <Setter Property="Transitions" Value="{x:Null}" />
+      <Setter Property="RenderTransform" Value="none" />
+    </Style>
+    <Style Selector=":is(TopLevel).reduced-motion Button.choice-card:pointerover,
+                   :is(TopLevel).reduced-motion Button.preset-pill:pointerover,
+                   :is(TopLevel).reduced-motion Button.preset-pill:pressed">
+      <Setter Property="RenderTransform" Value="none" />
+    </Style>
+  </UserControl.Styles>
+
   <Grid ColumnDefinitions="*,20,340" RowDefinitions="Auto,*">
     <TextBlock Grid.ColumnSpan="3" Classes="h1" Text="{DynamicResource theme.title}" Margin="0,0,0,18" />
 
     <StackPanel Grid.Row="1" Spacing="16">
+      <!-- Theme Style: Filee Soft vs Material You -->
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <DockPanel>
+            <Border DockPanel.Dock="Right" CornerRadius="{DynamicResource SoftRadiusPill}" Background="{DynamicResource AccentSoftBrush}" Padding="8,2"
+                    IsVisible="{Binding IsMaterialYou}">
+              <TextBlock Text="{DynamicResource theme.style.m3_badge}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AccentStrongBrush}" />
+            </Border>
+            <TextBlock Classes="label" Text="{DynamicResource theme.style}" VerticalAlignment="Center" Margin="0" />
+          </DockPanel>
+
+          <Grid ColumnDefinitions="*,12,*" RowDefinitions="Auto">
+            <Button Classes="choice-card"
+                    Classes.selected="{Binding !IsMaterialYou}"
+                    Command="{Binding SetStyleCommand}"
+                    CommandParameter="{x:Static settings:ThemeStyle.Soft}"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                    VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
+              <StackPanel Spacing="6" VerticalAlignment="Top">
+                <TextBlock Classes="choice-title" Text="{DynamicResource theme.style.Soft}" />
+                <TextBlock Classes="choice-desc" Text="{DynamicResource theme.style.soft_hint}" TextWrapping="Wrap" />
+              </StackPanel>
+            </Button>
+
+            <Button Grid.Column="2"
+                    Classes="choice-card"
+                    Classes.selected="{Binding IsMaterialYou}"
+                    Command="{Binding SetStyleCommand}"
+                    CommandParameter="{x:Static settings:ThemeStyle.MaterialYou}"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                    VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
+              <StackPanel Spacing="6" VerticalAlignment="Top">
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                  <TextBlock Classes="choice-title" Text="{DynamicResource theme.style.MaterialYou}" />
+                  <Border CornerRadius="{DynamicResource SoftRadiusPill}" Background="{DynamicResource AccentBrush}" Padding="6,1">
+                    <TextBlock Text="{DynamicResource theme.style.m3_tag}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource OnAccentBrush}" />
+                  </Border>
+                </StackPanel>
+                <TextBlock Classes="choice-desc" Text="{DynamicResource theme.style.material_you_hint}" TextWrapping="Wrap" />
+              </StackPanel>
+            </Button>
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <!-- Appearance Mode: System / Light / Dark -->
       <Border Classes="card">
         <StackPanel Spacing="8">
           <TextBlock Classes="label" Text="{DynamicResource theme.mode}" />
@@ -15,9 +139,13 @@
         </StackPanel>
       </Border>
 
+      <!-- Accent Colour & Curated Presets -->
       <Border Classes="card">
-        <StackPanel Spacing="10">
+        <StackPanel Spacing="12">
           <TextBlock Classes="label" Text="{DynamicResource theme.accent}" />
+
+          <!-- Vibrant / Classic Swatches -->
+          <TextBlock Classes="caption" Text="{DynamicResource theme.presets_vibrant}" FontWeight="SemiBold" Margin="0,2,0,0" />
           <ListBox x:Name="AccentSwatches" ItemsSource="{Binding Swatches}" SelectedItem="{Binding Accent, Mode=TwoWay}"
                    Background="Transparent" BorderThickness="0" Padding="0"
                    AutomationProperties.Name="{DynamicResource theme.accent}">
@@ -58,19 +186,50 @@
               </DataTemplate>
             </ListBox.ItemTemplate>
           </ListBox>
-          <StackPanel Orientation="Horizontal" Spacing="10">
+
+          <!-- Custom Colour Picker & Hex -->
+          <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2,0,0">
             <TextBlock Classes="label" VerticalAlignment="Center" Text="{DynamicResource theme.custom_color}" Margin="0" />
             <ColorPicker x:Name="AccentPicker" Color="{Binding Accent, Mode=TwoWay}" IsAlphaEnabled="False"
-                         MinHeight="44" MinWidth="90"
+                         MinHeight="40" MinWidth="90"
                          IsAlphaVisible="False" IsColorSpectrumVisible="True" IsColorPaletteVisible="False"
                          IsColorComponentsVisible="False" IsColorModelVisible="False" IsColorPreviewVisible="True"
                          FlowDirection="LeftToRight" AutomationProperties.Name="{DynamicResource theme.custom_color}" />
             <TextBox Text="{Binding AccentHex}" Width="120" PlaceholderText="#7F77DD" FlowDirection="LeftToRight"
                      AutomationProperties.Name="{DynamicResource theme.custom_color}" />
           </StackPanel>
+
+          <!-- Curated Pastel Presets -->
+          <TextBlock Classes="caption" Text="{DynamicResource theme.presets_pastel}" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <ItemsControl ItemsSource="{Binding PastelPresets}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <UniformGrid Columns="2" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ThemePageViewModel+PresetItem">
+                <Button Classes="preset-pill" Margin="0,0,6,6"
+                        Command="{Binding $parent[ItemsControl].((vm:ThemePageViewModel)DataContext).PickPresetCommand}"
+                        CommandParameter="{Binding}">
+                  <DockPanel>
+                    <Border DockPanel.Dock="Left" Width="18" Height="18" CornerRadius="999" Margin="0,0,8,0"
+                            BorderBrush="{DynamicResource SubtleBorderBrush}" BorderThickness="1">
+                      <Border.Background>
+                        <SolidColorBrush Color="{Binding Color}" />
+                      </Border.Background>
+                    </Border>
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="12" FontWeight="Medium"
+                               TextTrimming="CharacterEllipsis" />
+                  </DockPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
         </StackPanel>
       </Border>
 
+      <!-- Softness / Corner Radius -->
       <Border Classes="card">
         <StackPanel Spacing="8">
           <DockPanel>
@@ -93,6 +252,7 @@
         </StackPanel>
       </Border>
 
+      <!-- Reduced Motion -->
       <Border Classes="card">
         <StackPanel Spacing="4">
           <CheckBox Content="{DynamicResource theme.reduce_motion}" IsChecked="{Binding ReduceMotion}" FontWeight="SemiBold" />
