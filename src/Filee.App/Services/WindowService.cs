@@ -7,6 +7,8 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Filee.App.ViewModels;
 using Filee.App.Views;
+using Filee.Core.Conversion;
+using Filee.Core.Formats;
 using Filee.Core.Localization;
 using Filee.Core.Presets;
 using Filee.Core.Settings;
@@ -30,6 +32,9 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
     internal FormatRequestNoticeWindow? FormatRequestNotice => _formatRequestNotice;
 
     private CropOverlayWindow? _cropOverlay;
+    private ClipWindow? _clipWindow;
+
+    internal ClipWindow? ClipWindow => _clipWindow;
     private MergeOrderWindow? _mergeOrder;
 
     internal MergeOrderWindow? MergeOrder => _mergeOrder;
@@ -53,6 +58,93 @@ public sealed class WindowService(ILocalizer loc, IServiceProvider services, Mem
     }
 
     public MainWindow? Main => _main;
+
+    /// <summary>Opens the window of a tool preset (crop, cut a clip) on the files. A tool this version doesn't know opens nothing.</summary>
+    public void ShowTool(IReadOnlyList<string> files, Preset preset, PixelPoint? near = null)
+    {
+        if (preset.IsJoinTool)
+            ShowJoinWindow(files, preset, near);
+        else if (preset.IsClipTool)
+            ShowClipWindow(files, preset, near);
+        else if (preset.IsCropTool)
+            ShowCropOverlay(files, preset, near);
+    }
+
+    /// <summary>
+    /// Opens the "Cut a clip" window on the videos among the files. Each clip is written by an ordinary conversion,
+    /// shown in the toast.
+    /// </summary>
+    public void ShowClipWindow(IReadOnlyList<string> files, Preset preset, PixelPoint? near = null, IReadOnlyList<string>? joining = null)
+    {
+        var videos = files.Where(f => FormatRegistry.Detect(f)?.Category == FormatCategory.Video).ToList();
+        if (videos.Count == 0)
+            return;
+        _clipWindow?.Close();
+        var store = services.GetRequiredService<UserDataStore>();
+        var catalog = services.GetRequiredService<ConverterCatalog>();
+        var conversions = services.GetRequiredService<ConversionService>();
+        var log = services.GetService<ILogger<ClipWindowViewModel>>();
+        var vm = new ClipWindowViewModel(videos, preset, loc, store, new FfmpegFrameSource(),
+            path => ClipTool.TargetFor(FormatRegistry.Detect(path)?.Id ?? ClipTool.FallbackTarget, catalog.CreatePlanner()),
+            (path, conversion) => conversions.Start([path], conversion), log, joining);
+        var win = new ClipWindow { DataContext = vm };
+        win.PositionOnScreen(near);
+        win.Closed += (_, _) =>
+        {
+            if (_clipWindow == win)
+                _clipWindow = null;
+            trimmer.Request();
+        };
+        _clipWindow = win;
+        win.Show();
+        win.Activate();
+    }
+
+    /// <summary>
+    /// "Join videos": the order window for two or more videos (then one conversion joins them, or the editor opens
+    /// with all of them); one video opens the editor with it, to add more there.
+    /// </summary>
+    public void ShowJoinWindow(IReadOnlyList<string> files, Preset preset, PixelPoint? near = null)
+    {
+        var videos = files.Where(f => FormatRegistry.Detect(f)?.Category == FormatCategory.Video).ToList();
+        if (videos.Count == 0)
+            return;
+        var store = services.GetRequiredService<UserDataStore>();
+        var clipTool = store.FindPreset("tool-clip") is { IsClipTool: true } clip ? clip : BuiltInData.ClipPresets()[0];
+        if (videos.Count == 1)
+        {
+            ShowClipWindow(videos, clipTool, near, joining: []);
+            return;
+        }
+        var vm = new JoinVideosViewModel(videos, loc, new FfmpegFrameSource());
+        var dialog = new JoinVideosWindow { DataContext = vm };
+        dialog.Closed += (_, _) =>
+        {
+            if (vm.Result is not { } choice)
+                return;
+            if (choice.OpenInEditor)
+            {
+                ShowClipWindow([choice.Files[0]], clipTool, near, joining: choice.Files.Skip(1).ToList());
+                return;
+            }
+            try
+            {
+                var catalog = services.GetRequiredService<ConverterCatalog>();
+                var conversions = services.GetRequiredService<ConversionService>();
+                var first = choice.Files[0];
+                var target = ClipTool.TargetFor(FormatRegistry.Detect(first)?.Id ?? ClipTool.FallbackTarget, catalog.CreatePlanner());
+                var tool = preset.Clone();
+                tool.Media.HardwareEncoding = store.Settings.EditorExport.Gpu;
+                conversions.Start([first], ClipTool.ConversionOf(tool, target, choice.Edit));
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                services.GetService<ILogger<JoinVideosViewModel>>()?.LogError(ex, "Could not start joining {Count} videos", choice.Files.Count);
+            }
+        };
+        dialog.Show();
+        dialog.Activate();
+    }
 
     /// <summary>Opens the interactive crop overlay for the files.</summary>
     public void ShowCropOverlay(IReadOnlyList<string> files, Preset preset, PixelPoint? near = null)
